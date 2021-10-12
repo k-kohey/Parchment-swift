@@ -22,17 +22,28 @@ public final class LoggerBundler {
         self.loggingStorategy = loggingStorategy
     }
     
-    public func send(_ event: Loggable, with policy: LoggingPolicy = .bufferingFirst) {
-        if policy == .immediately {
-            components.forEach { logger in
+    public func send(_ event: Loggable, with option: LoggingOption = .init()) {
+        let loggers: [LoggerComponent] = {
+            guard let scope = option.scope else { return components }
+            switch scope {
+            case .only(let loggerIDs):
+                return components.filter { loggerIDs.contains($0.id) }
+            case .exclude(let loggerIDs):
+                return components.filter { !loggerIDs.contains($0.id) }
+            }
+        }()
+        
+        switch option.policy {
+        case .immediately:
+            loggers.forEach { logger in
                 let isSucceeded = logger.send(event)
                 let record = BufferRecord(destination: logger.id.value, event: event)
                 if !isSucceeded {
                     buffer.enqueue(record)
                 }
             }
-        } else {
-            components.forEach { logger in
+        case .bufferingFirst:
+            loggers.forEach { logger in
                 buffer.enqueue(
                     .init(
                         destination: logger.id.value,
@@ -46,7 +57,14 @@ public final class LoggerBundler {
     public func startLogging() {
         loggingStorategy.schedule(with: buffer) { [weak self] records in
             records.forEach {
-                self?.send($0.event)
+                self?.send(
+                    $0.event,
+                    with: .init(
+                        policy: .immediately,
+                        // いい感じにする
+                        scope: .only([.init($0.destination)])
+                    )
+                )
             }
         }
     }
@@ -58,14 +76,27 @@ public extension LoggerBundler {
         case bufferingFirst
     }
     
-//    enum LoggingOption {
-//        case policy(LoggingPolicy)
-//        case exclude([LoggerComponentID])
-//    }
+    enum LoggerScope {
+        case only([LoggerComponentID])
+        case exclude([LoggerComponentID])
+    }
+    
+    struct LoggingOption {
+        let policy: LoggingPolicy
+        let scope: LoggerScope?
+        
+        public init(
+            policy: LoggingPolicy = .bufferingFirst,
+            scope: LoggerScope? = nil
+        ) {
+            self.policy = policy
+            self.scope = scope
+        }
+    }
 }
 
 public extension LoggerBundler {
-    func send(_ event: ExpandableLoggingEvent, with policy: LoggingPolicy = .immediately) {
-        send(event as Loggable, with: policy)
+    func send(_ event: ExpandableLoggingEvent, with option: LoggingOption = .init()) {
+        send(event as Loggable, with: option)
     }
 }
