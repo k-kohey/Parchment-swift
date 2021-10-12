@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol BufferdEventLoggingStorategy {
-    func schedule(with buffer: TrackingEventBuffer, willLog: @escaping ([Loggable])->())
+    func schedule(with buffer: TrackingEventBuffer, willLog: @escaping ([BufferRecord])->())
 }
 
 public class RegularlyBufferdEventLoggingStorategy: BufferdEventLoggingStorategy {
@@ -21,11 +21,9 @@ public class RegularlyBufferdEventLoggingStorategy: BufferdEventLoggingStorategy
         self.timeInterval = timeInterval
     }
     
-    
-    public func schedule(with buffer: TrackingEventBuffer, willLog: @escaping ([Loggable])->()) {
+    public func schedule(with buffer: TrackingEventBuffer, willLog: @escaping ([BufferRecord])->()) {
         timer = .init(timeInterval: timeInterval, repeats: true) { _ in
-            let bufferdEvent = buffer.load()
-            willLog(bufferdEvent)
+            willLog(buffer.dequeue(limit: .max))
         }
     }
 }

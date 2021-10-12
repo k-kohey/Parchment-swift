@@ -8,20 +8,14 @@
 import Foundation
 
 public struct BufferRecord {
-    let event: Loggable
-    let destination: String
+    public let id = UUID().uuidString
+    public let destination: String
+    public let event: Loggable
 }
 
 public protocol TrackingEventBuffer {
-    func save(_ :[BufferRecord])
-    func load() -> [Loggable]
+    func enqueue(_ e: BufferRecord)
+    func dequeue() -> BufferRecord?
+    func dequeue(limit: Int) -> [BufferRecord]
     func count() -> Int
-}
-
-public struct Buffer: TrackingEventBuffer {
-    public func save(_ :[BufferRecord]) {}
-    public func load() -> [Loggable] { [] }
-    public func count() -> Int { 0 }
-    
-    public init() {}
 }

@@ -7,10 +7,6 @@
 
 import Foundation
 
-public protocol LoggerComponent {
-    func send(_: Loggable) -> Bool
-}
-
 public final class LoggerBundler {
     private let components: [LoggerComponent]
     private let buffer: TrackingEventBuffer
@@ -18,7 +14,7 @@ public final class LoggerBundler {
     
     public init(
         components: [LoggerComponent],
-        buffer: TrackingEventBuffer = Buffer(),
+        buffer: TrackingEventBuffer,
         loggingStorategy: BufferdEventLoggingStorategy = RegularlyBufferdEventLoggingStorategy.default
     ) {
         self.components = components
@@ -26,26 +22,31 @@ public final class LoggerBundler {
         self.loggingStorategy = loggingStorategy
     }
     
-    public func send(_ event: Loggable, with policy: LoggingPolicy = .buffering) {
+    public func send(_ event: Loggable, with policy: LoggingPolicy = .bufferingFirst) {
         if policy == .immediately {
-            components.forEach {
-                let isSucceeded = $0.send(event)
+            components.forEach { logger in
+                let isSucceeded = logger.send(event)
+                let record = BufferRecord(destination: logger.id.value, event: event)
                 if !isSucceeded {
-                    buffer.save([.init(event: event, destination: "\(type(of: $0))")])
+                    buffer.enqueue(record)
                 }
             }
-            return
-        }
-        
-        components.forEach {
-            buffer.save([.init(event: event, destination: "\(type(of: $0))")])
+        } else {
+            components.forEach { logger in
+                buffer.enqueue(
+                    .init(
+                        destination: logger.id.value,
+                        event: event
+                    )
+                )
+            }
         }
     }
     
     public func startLogging() {
-        loggingStorategy.schedule(with: buffer) { [weak self] events in
-            events.forEach { event in
-                self?.send(event, with: .immediately)
+        loggingStorategy.schedule(with: buffer) { [weak self] records in
+            records.forEach {
+                self?.send($0.event)
             }
         }
     }
@@ -54,8 +55,13 @@ public final class LoggerBundler {
 public extension LoggerBundler {
     enum LoggingPolicy {
         case immediately
-        case buffering
+        case bufferingFirst
     }
+    
+//    enum LoggingOption {
+//        case policy(LoggingPolicy)
+//        case exclude([LoggerComponentID])
+//    }
 }
 
 public extension LoggerBundler {

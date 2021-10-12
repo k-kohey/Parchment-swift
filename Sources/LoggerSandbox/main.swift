@@ -1,6 +1,13 @@
 import Logger
 
+extension LoggerComponentID {
+    static let mixpanel: Self = .init("Mixpanel")
+    static let api: Self = .init("AnalyticsAPI")
+}
+
 struct MixpanelLogger: LoggerComponent {
+    static var id: LoggerComponentID = .mixpanel
+    
     func send(_ e: Loggable) -> Bool {
         // do logging
         print("log: \(e)")
@@ -13,6 +20,8 @@ struct MixpanelLogger: LoggerComponent {
 }
 
 struct AnalyticsAPILogger: LoggerComponent {
+    static var id: LoggerComponentID = .api
+    
     func send(_ e: Loggable) -> Bool {
         // do logging
         print("log: \(e)")
@@ -39,17 +48,29 @@ enum Event: Loggable {
     }
 }
 
-struct EventDataBase: TrackingEventBuffer {
-    func save(_: [BufferRecord]) {
-        
+// debug用の実装
+class EventQueue: TrackingEventBuffer {
+    private var records: [BufferRecord] = []
+    
+    func enqueue(_ e: BufferRecord) {
+        records.append(e)
     }
     
-    func load() -> [Loggable] {
-        []
+    func dequeue() -> BufferRecord? {
+        defer {
+            records.removeFirst()
+        }
+        return records.first
+    }
+    
+    func dequeue(limit: Int) -> [BufferRecord] {
+        (0..<limit).reduce([]) { result, _ in
+            result + [dequeue()].compactMap { $0 }
+        }
     }
     
     func count() -> Int {
-        0
+        records.count
     }
 }
 
@@ -65,7 +86,7 @@ let own = AnalyticsAPILogger()
 mixpanel.setCustomProperty(["user_id": "hogehoge1010"])
 
 // イベントをプールするデータベースを宣言
-let db = EventDataBase()
+let buffer = EventQueue()
 
 // どのようなロジックでプールしたイベントをバックエンドに送信するかを宣言
 // 今回の場合は1分間に1回プールして送信するように初期値を設定
@@ -74,7 +95,7 @@ let storategy = RegularlyBufferdEventLoggingStorategy(timeInterval: 60)
 // loggerの宣言
 let loggerBundler = LoggerBundler(
     components: [mixpanel, own],
-    buffer: db,
+    buffer: buffer,
     loggingStorategy: storategy
 )
 
@@ -82,8 +103,8 @@ let loggerBundler = LoggerBundler(
 loggerBundler.startLogging()
 
 // プールにためて任意のタイミングでログを送信
-loggerBundler.send(Event.touch(button: "purchaseButton"), with: .buffering)
-loggerBundler.send(.screenStart(name: "home"), with: .buffering)
+loggerBundler.send(Event.touch(button: "purchaseButton"), with: .bufferingFirst)
+loggerBundler.send(.screenStart(name: "home"), with: .bufferingFirst)
 
 // プールに貯めずに直ちにログを送信
 loggerBundler.send(.impletion, with: .immediately)
