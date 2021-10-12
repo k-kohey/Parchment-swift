@@ -103,9 +103,9 @@ let loggerBundler = LoggerBundler(
 loggerBundler.startLogging()
 
 // プールにためて任意のタイミングでログを送信
-loggerBundler.send(Event.touch(button: "purchaseButton"), with: .bufferingFirst)
-loggerBundler.send(.screenStart(name: "home"), with: .bufferingFirst)
+loggerBundler.send(Event.touch(button: "purchaseButton"), with: .init(policy: .bufferingFirst))
+loggerBundler.send(.screenStart(name: "home"), with: .init(policy: .bufferingFirst, scope: .exclude([.api])))
 
 // プールに貯めずに直ちにログを送信
-loggerBundler.send(.impletion, with: .immediately)
+loggerBundler.send(.impletion, with: .init(policy: .immediately))
 
