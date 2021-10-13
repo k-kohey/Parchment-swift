@@ -22,8 +22,21 @@ public class RegularlyBufferdEventLoggingStorategy: BufferdEventLoggingStorategy
     }
     
     public func schedule(with buffer: TrackingEventBuffer, willLog: @escaping ([BufferRecord])->()) {
-        timer = .init(timeInterval: timeInterval, repeats: true) { _ in
-            willLog(buffer.dequeue(limit: .max))
+        timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true) { _ in
+            let records = buffer.dequeue(limit: .max)
+            if !records.isEmpty {
+                print("""
+                
+                =========================================================
+                ✨ Flush \(records.count) event
+                =========================================================
+                
+                """)
+            }
+            willLog(records)
         }
+        
+        // for debug on command line tool
+        RunLoop.current.add(timer!, forMode: .default)
     }
 }
