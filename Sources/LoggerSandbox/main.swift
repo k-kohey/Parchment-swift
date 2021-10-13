@@ -83,7 +83,7 @@ extension ExpandableLoggingEvent {
 
 // ログの送信先を宣言
 let mixpanel = MixpanelLogger()
-let own = FirebaseLogger()
+let firebase = FirebaseLogger()
 
 // ユーザプロパティの設定は個別に行う
 mixpanel.setCustomProperty(["user_id": "hogehoge1010"])
@@ -98,7 +98,7 @@ func makeLogger() -> LoggerBundler {
 
     // loggerの宣言
     let loggerBundler = LoggerBundler(
-        components: [mixpanel, own],
+        components: [mixpanel, firebase],
         buffer: buffer,
         loggingStorategy: storategy
     )
