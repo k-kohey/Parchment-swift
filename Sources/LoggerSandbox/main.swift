@@ -88,33 +88,51 @@ let own = FirebaseLogger()
 // ユーザプロパティの設定は個別に行う
 mixpanel.setCustomProperty(["user_id": "hogehoge1010"])
 
-// イベントをプールするデータベースを宣言
-let buffer = EventQueue()
 
-// どのようなロジックでプールしたイベントをバックエンドに送信するかを宣言
-let storategy = RegularlyBufferdEventLoggingStorategy(timeInterval: 5)
+func makeLogger() -> LoggerBundler {
+    // イベントをプールするデータベースを宣言
+    let buffer = EventQueue()
 
-// loggerの宣言
-let loggerBundler = LoggerBundler(
-    components: [mixpanel, own],
-    buffer: buffer,
-    loggingStorategy: storategy
-)
+    // どのようなロジックでプールしたイベントをバックエンドに送信するかを宣言
+    let storategy = RegularlyBufferdEventLoggingStorategy(timeInterval: 5, limitOnNumberOfEvent: 10)
 
-// プールの監視を開始
-loggerBundler.startLogging()
+    // loggerの宣言
+    let loggerBundler = LoggerBundler(
+        components: [mixpanel, own],
+        buffer: buffer,
+        loggingStorategy: storategy
+    )
 
-// プールにためて任意のタイミングでログを送信
-loggerBundler.send(Event.touch(button: "purchaseButton"), with: .init(policy: .bufferingFirst))
-loggerBundler.send(.screenStart(name: "home"), with: .init(policy: .bufferingFirst, scope: .only([.firebase])))
-
-for _ in 0..<5 {
-    loggerBundler.send(.impletion, with: .init(scope: .exclude([.mixpanel])))
+    // プールの監視を開始
+    loggerBundler.startLogging()
+    
+    return loggerBundler
 }
 
-// プールに貯めずに直ちにログを送信
-loggerBundler.send(.impletion, with: .init(policy: .immediately))
+var logger: LoggerBundler!
 
+func poolに貯めずに直ちにログを送信() {
+    logger = makeLogger()
+    logger.send(.impletion, with: .init(policy: .immediately))
+}
+
+
+
+func poolの限界値以上のログをためたら直ちにログを送信() {
+    logger = makeLogger()
+    for _ in 0..<11 {
+        logger.send(.impletion, with: .init(scope: .only([.firebase])))
+    }
+}
+
+func poolにためて任意のタイミングでログを送信() {
+    logger = makeLogger()
+    logger.send(Event.touch(button: "purchaseButton"), with: .init(policy: .bufferingFirst))
+    logger.send(.screenStart(name: "home"), with: .init(policy: .bufferingFirst, scope: .only([.firebase])))
+}
+
+
+poolにためて任意のタイミングでログを送信()
 
 // for buffering debug
 RunLoop.current.run()

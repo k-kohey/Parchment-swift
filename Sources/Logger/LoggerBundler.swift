@@ -24,12 +24,10 @@ public final class LoggerBundler {
     
     public func send(_ event: Loggable, with option: LoggingOption = .init()) {
         let loggers: [LoggerComponent] = {
-            guard let scope = option.scope else { return components }
-            switch scope {
-            case .only(let loggerIDs):
-                return components.filter { loggerIDs.contains($0.id) }
-            case .exclude(let loggerIDs):
-                return components.filter { !loggerIDs.contains($0.id) }
+            if let scope = option.scope {
+                return components[scope]
+            } else {
+                return components
             }
         }()
         
@@ -98,5 +96,16 @@ public extension LoggerBundler {
 public extension LoggerBundler {
     func send(_ event: ExpandableLoggingEvent, with option: LoggingOption = .init()) {
         send(event as Loggable, with: option)
+    }
+}
+
+private extension Sequence where Element == LoggerComponent {
+    subscript(scope: LoggerBundler.LoggerScope) -> [Element] {
+        switch scope {
+        case .only(let loggerIDs):
+            return filter { loggerIDs.contains($0.id) }
+        case .exclude(let loggerIDs):
+            return filter { !loggerIDs.contains($0.id) }
+        }
     }
 }
