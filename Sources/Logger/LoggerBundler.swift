@@ -10,16 +10,16 @@ import Foundation
 public final class LoggerBundler {
     private let components: [LoggerComponent]
     private let buffer: TrackingEventBuffer
-    private let loggingStorategy: BufferdEventLoggingStorategy
+    private let flushStorategy: BufferdEventFlushStorategy
     
     public init(
         components: [LoggerComponent],
         buffer: TrackingEventBuffer,
-        loggingStorategy: BufferdEventLoggingStorategy = RegularlyBufferdEventLoggingStorategy.default
+        loggingStorategy: BufferdEventFlushStorategy = RegularlyBufferdEventFlushStorategy.default
     ) {
         self.components = components
         self.buffer = buffer
-        self.loggingStorategy = loggingStorategy
+        self.flushStorategy = loggingStorategy
     }
     
     public func send(_ event: Loggable, with option: LoggingOption = .init()) {
@@ -53,7 +53,7 @@ public final class LoggerBundler {
     }
     
     public func startLogging() {
-        loggingStorategy.schedule(with: buffer) { [weak self] records in
+        flushStorategy.schedule(with: buffer) { [weak self] records in
             records.forEach {
                 self?.send(
                     $0.event,

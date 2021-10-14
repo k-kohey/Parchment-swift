@@ -94,7 +94,7 @@ func makeLogger() -> LoggerBundler {
     let buffer = EventQueue()
 
     // どのようなロジックでプールしたイベントをバックエンドに送信するかを宣言
-    let storategy = RegularlyBufferdEventLoggingStorategy(timeInterval: 5, limitOnNumberOfEvent: 10)
+    let storategy = RegularlyBufferdEventFlushStorategy(timeInterval: 5, limitOnNumberOfEvent: 10)
 
     // loggerの宣言
     let loggerBundler = LoggerBundler(
