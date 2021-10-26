@@ -12,6 +12,8 @@ public final class LoggerBundler {
     private let buffer: TrackingEventBuffer
     private let flushStorategy: BufferdEventFlushStorategy
     
+    public var configMap: [LoggerComponentID: Configuration] = [:]
+    
     public init(
         components: [LoggerComponent],
         buffer: TrackingEventBuffer,
@@ -36,12 +38,13 @@ public final class LoggerBundler {
             loggers.forEach { logger in
                 let isSucceeded = logger.send(event)
                 let record = BufferRecord(destination: logger.id.value, event: event)
-                if !isSucceeded {
+                if !isSucceeded && configMap[logger.id]?.allowBuffering  == .some(true) {
                     buffer.enqueue(record)
                 }
             }
         case .bufferingFirst:
             loggers.forEach { logger in
+                guard configMap[logger.id]?.allowBuffering  == .some(true) else { return }
                 buffer.enqueue(
                     .init(
                         destination: logger.id.value,
@@ -94,6 +97,16 @@ public extension LoggerBundler {
 }
 
 public extension LoggerBundler {
+    struct Configuration {
+        let allowBuffering: Bool
+        
+        public init(allowBuffering: Bool) {
+            self.allowBuffering = allowBuffering
+        }
+    }
+}
+
+public extension LoggerBundler {
     func send(_ event: ExpandableLoggingEvent, with option: LoggingOption = .init()) {
         send(event as Loggable, with: option)
     }
@@ -107,5 +120,9 @@ private extension Sequence where Element == LoggerComponent {
         case .exclude(let loggerIDs):
             return filter { !loggerIDs.contains($0.id) }
         }
+    }
+    
+    subscript(id: LoggerComponentID) -> Element {
+        first(where: { $0.id == id })!
     }
 }

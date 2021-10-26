@@ -102,6 +102,8 @@ func makeLogger() -> LoggerBundler {
         buffer: buffer,
         loggingStorategy: storategy
     )
+    
+    loggerBundler.configMap = [.mixpanel: .init(allowBuffering: false)]
 
     // プールの監視を開始
     loggerBundler.startLogging()
@@ -115,8 +117,6 @@ func poolに貯めずに直ちにログを送信() {
     logger = makeLogger()
     logger.send(.impletion, with: .init(policy: .immediately))
 }
-
-
 
 func poolの限界値以上のログをためたら直ちにログを送信() {
     logger = makeLogger()
@@ -132,7 +132,7 @@ func poolにためて任意のタイミングでログを送信() {
 }
 
 
-poolにためて任意のタイミングでログを送信()
+poolに貯めずに直ちにログを送信()
 
 // for buffering debug
 RunLoop.current.run()
