@@ -4,6 +4,7 @@ import Foundation
 extension LoggerComponentID {
     static let mixpanel: Self = .init("Mixpanel")
     static let firebase: Self = .init("Firebase")
+    static let fail: Self = .init("fail")
 }
 
 struct MixpanelLogger: LoggerComponent {
@@ -27,6 +28,18 @@ struct FirebaseLogger: LoggerComponent {
         // do logging
         print("🚀 send to firebase:\n   =>\(e)")
         return true
+    }
+    
+    func setCustomProperty(_ : [String: String]) {
+        // do anything
+    }
+}
+
+struct FailLogger: LoggerComponent {
+    static var id: LoggerComponentID = .fail
+    
+    func send(_ e: Loggable) -> Bool {
+        false
     }
     
     func setCustomProperty(_ : [String: String]) {
@@ -84,12 +97,15 @@ extension ExpandableLoggingEvent {
 // ログの送信先を宣言
 let mixpanel = MixpanelLogger()
 let firebase = FirebaseLogger()
+let fail = FailLogger()
 
 // ユーザプロパティの設定は個別に行う
 mixpanel.setCustomProperty(["user_id": "hogehoge1010"])
 
 
 func makeLogger() -> LoggerBundler {
+    Logger.Configuration.shouldPrintDebugLog = true
+    
     // イベントをプールするデータベースを宣言
     let buffer = EventQueue()
 
@@ -98,12 +114,12 @@ func makeLogger() -> LoggerBundler {
 
     // loggerの宣言
     let loggerBundler = LoggerBundler(
-        components: [mixpanel, firebase],
+        components: [mixpanel, firebase, fail],
         buffer: buffer,
         loggingStorategy: storategy
     )
     
-    loggerBundler.configMap = [.mixpanel: .init(allowBuffering: false)]
+    loggerBundler.configMap = [.fail: .init(allowBuffering: false)]
 
     // プールの監視を開始
     loggerBundler.startLogging()
@@ -132,7 +148,7 @@ func poolにためて任意のタイミングでログを送信() {
 }
 
 
-poolに貯めずに直ちにログを送信()
+makeLogger().send(Event.touch(button: "purchaseButton"), with: .init(policy: .immediately))
 
 // for buffering debug
 RunLoop.current.run()

@@ -38,13 +38,25 @@ public final class LoggerBundler {
             loggers.forEach { logger in
                 let isSucceeded = logger.send(event)
                 let record = BufferRecord(destination: logger.id.value, event: event)
-                if !isSucceeded && configMap[logger.id]?.allowBuffering  == .some(true) {
+                let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
+                if shouldBuffering {
                     buffer.enqueue(record)
+                } else if !isSucceeded {
+                    console?.log("""
+                    ⚠ The logger(id=\(logger.id.value)) failed to log an event \(event.eventName).
+                    However, buffering is skiped because it is not allowed in the configuration.
+                    """)
                 }
             }
         case .bufferingFirst:
             loggers.forEach { logger in
-                guard configMap[logger.id]?.allowBuffering  == .some(true) else { return }
+                guard configMap[logger.id]?.allowBuffering != .some(false) else {
+                    console?.log("""
+                    ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
+                    BufferingFirst policy has been selected in options, but the logger does not allow buffering.
+                    """)
+                    return
+                }
                 buffer.enqueue(
                     .init(
                         destination: logger.id.value,
