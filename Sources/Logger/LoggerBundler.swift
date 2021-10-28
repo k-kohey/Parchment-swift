@@ -7,6 +7,14 @@
 
 import Foundation
 
+struct DateProvider {
+    static var mock: Date?
+    
+    static func current() -> Date {
+        Self.mock ?? .init()
+    }
+}
+
 public final class LoggerBundler {
     private let components: [LoggerComponent]
     private let buffer: TrackingEventBuffer
@@ -33,37 +41,38 @@ public final class LoggerBundler {
             }
         }()
         
+        loggers.forEach { logger in
+            let record = BufferRecord(
+                destination: logger.id.value,
+                event: event,
+                timestamp: DateProvider.current()
+            )
+            send(record, using: logger, with: option)
+        }
+    }
+    
+    private func send(_ record: BufferRecord, using logger: LoggerComponent, with option: LoggingOption = .init()) {
         switch option.policy {
         case .immediately:
-            loggers.forEach { logger in
-                let isSucceeded = logger.send(event)
-                let record = BufferRecord(destination: logger.id.value, event: event)
-                let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
-                if shouldBuffering {
-                    buffer.enqueue(record)
-                } else if !isSucceeded {
-                    console?.log("""
-                    ⚠ The logger(id=\(logger.id.value)) failed to log an event \(event.eventName).
-                    However, buffering is skiped because it is not allowed in the configuration.
-                    """)
-                }
+            let isSucceeded = logger.send(record.event)
+            let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
+            if shouldBuffering {
+                buffer.enqueue(record)
+            } else if !isSucceeded {
+                console?.log("""
+                ⚠ The logger(id=\(logger.id.value)) failed to log an event \(record.event.eventName).
+                However, buffering is skiped because it is not allowed in the configuration.
+                """)
             }
         case .bufferingFirst:
-            loggers.forEach { logger in
-                guard configMap[logger.id]?.allowBuffering != .some(false) else {
-                    console?.log("""
-                    ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
-                    BufferingFirst policy has been selected in options, but the logger does not allow buffering.
-                    """)
-                    return
-                }
-                buffer.enqueue(
-                    .init(
-                        destination: logger.id.value,
-                        event: event
-                    )
-                )
+            guard configMap[logger.id]?.allowBuffering != .some(false) else {
+                console?.log("""
+                ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
+                BufferingFirst policy has been selected in options, but the logger does not allow buffering.
+                """)
+                return
             }
+            buffer.enqueue(record)
         }
     }
     
@@ -71,12 +80,8 @@ public final class LoggerBundler {
         flushStorategy.schedule(with: buffer) { [weak self] records in
             records.forEach {
                 self?.send(
-                    $0.event,
-                    with: .init(
-                        policy: .immediately,
-                        // いい感じにする
-                        scope: .only([.init($0.destination)])
-                    )
+                    $0,
+                    using: self!.components[.init($0.destination)]
                 )
             }
         }
@@ -99,7 +104,7 @@ public extension LoggerBundler {
         let scope: LoggerScope?
         
         public init(
-            policy: LoggingPolicy = .bufferingFirst,
+            policy: LoggingPolicy = .immediately,
             scope: LoggerScope? = nil
         ) {
             self.policy = policy

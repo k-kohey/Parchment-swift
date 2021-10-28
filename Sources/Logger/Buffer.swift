@@ -11,6 +11,7 @@ public struct BufferRecord {
     public let id = UUID().uuidString
     public let destination: String
     public let event: Loggable
+    let timestamp: Date
 }
 
 public protocol TrackingEventBuffer {
