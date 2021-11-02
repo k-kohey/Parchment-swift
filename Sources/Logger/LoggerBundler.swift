@@ -143,3 +143,14 @@ private extension Sequence where Element == LoggerComponent {
         first(where: { $0.id == id })!
     }
 }
+
+private extension BufferRecord {
+    struct Event: Loggable {
+        public let eventName: String
+        public let parameters: [String: Any]
+    }
+    
+    var event: Event {
+        .init(eventName: eventName, parameters: parameters)
+    }
+}

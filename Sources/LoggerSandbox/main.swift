@@ -54,7 +54,7 @@ enum Event: Loggable {
         "\(self)"
     }
 
-    var parameters: [String : String] {
+    var parameters: [String : Any] {
         switch self {
         case .touch(let screen):
             return ["screen": screen]
@@ -79,8 +79,8 @@ class EventQueue: TrackingEventBuffer {
         return records.first
     }
     
-    func dequeue(limit: Int) -> [BufferRecord] {
-        (0..<min(limit, records.count)).reduce([]) { result, _ in
+    func dequeue(limit: Int64) -> [BufferRecord] {
+        (0..<min(Int(limit), records.count)).reduce([]) { result, _ in
             result + [dequeue()].compactMap { $0 }
         }
     }
