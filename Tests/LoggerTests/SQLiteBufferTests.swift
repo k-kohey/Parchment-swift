@@ -35,6 +35,17 @@ final class SQLiteBufferTests: XCTestCase {
         XCTAssertEqual(results, records)
     }
     
+    func testCount() {
+        let records = makeRecords()
+        
+        records.forEach {
+            buffer.enqueue($0)
+        }
+        
+        let results = buffer.count()
+        XCTAssertEqual(results, records.count)
+    }
+    
     private func makeRecords() -> [BufferRecord] {
         (0..<10).compactMap {
             .init(

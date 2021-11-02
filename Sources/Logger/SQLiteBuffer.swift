@@ -14,24 +14,17 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         case failedToCreateSQLiteTable
     }
     
-    private static let dateFormatter: DateFormatter = {
-        let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd HH:mm:ss.SSSZ"
-        return df
-    }()
-    
     private var dbPointer: OpaquePointer?
-    private let dbFilePath: URL
     
     init() throws {
-        dbFilePath = try FileManager.default.url(
+        let dbFilePath = try FileManager.default.url(
             for: .documentDirectory,
             in: .userDomainMask,
             appropriateFor: nil,
             create: false
         ).appendingPathComponent("Events.db")
         
-        console?.log("Events.db is created on \(self.dbFilePath.absoluteString)")
+        console?.log("Events.db is created on \(dbFilePath.absoluteString)")
         
         if sqlite3_open(dbFilePath.path, &dbPointer) != SQLITE_OK {
             throw SQLiteBufferError.dbfileCanNotBeenOpend
@@ -57,6 +50,10 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     }
     
     public func enqueue(_ e: BufferRecord) {
+        defer {
+            sqlite3_finalize(context)
+        }
+        
         let query = """
         INSERT INTO Events (
             id,
@@ -115,6 +112,10 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     }
     
     public func dequeue(limit: Int64) -> [BufferRecord] {
+        defer {
+            sqlite3_finalize(context)
+        }
+        
         let query: String
         if limit < 1 {
             query = "SELECT * FROM Events ORDER BY timestamp"
@@ -130,7 +131,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
          
         var result: [BufferRecord] = []
         
-        while(sqlite3_step(context) == SQLITE_ROW){
+        while(sqlite3_step(context) == SQLITE_ROW) {
             let id = String(cString: sqlite3_column_text(context, 0))
             let destination = String(cString: sqlite3_column_text(context, 1))
             let timestamp = sqlite3_column_int64(context, 2)
@@ -160,7 +161,21 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     }
     
     public func count() -> Int {
-        0
+        defer {
+            sqlite3_finalize(context)
+        }
+        
+        let query = "SELECT COUNT(*) FROM Events"
+        let context = prepare(query: query)
+        
+        if sqlite3_step(context) != SQLITE_ROW {
+            assertionWithLastErrorMessage()
+            return 0
+        }
+        
+        let result = Int(sqlite3_column_int64(context, 0))
+        
+        return result
     }
     
     private func prepare(query: String, option: Int32 = SQLITE_PREPARE_PERSISTENT) -> OpaquePointer? {
