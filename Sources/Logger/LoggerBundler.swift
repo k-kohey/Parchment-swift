@@ -78,10 +78,18 @@ public final class LoggerBundler {
     
     public func startLogging() {
         flushStorategy.schedule(with: buffer) { [weak self] records in
+            guard let self = self else {
+                assertionFailure("""
+                LoggerBundler instance should been retainted by any objects for logging.
+                Logging cannot be performed in this state.
+                """)
+                return
+            }
+            
             records.forEach {
-                self?.send(
+                self.send(
                     $0,
-                    using: self!.components[.init($0.destination)]
+                    using: self.components[.init($0.destination)]
                 )
             }
         }
