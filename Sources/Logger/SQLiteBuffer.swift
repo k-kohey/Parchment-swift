@@ -50,10 +50,6 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     }
     
     public func enqueue(_ e: BufferRecord) {
-        defer {
-            sqlite3_finalize(context)
-        }
-        
         let query = """
         INSERT INTO Events (
             id,
@@ -65,6 +61,10 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         """
         
         let context = prepare(query: query)
+        
+        defer {
+            sqlite3_finalize(context)
+        }
         
         if sqlite3_bind_text(context, 1, e.id.utf8String, -1, nil) != SQLITE_OK {
             assertionWithLastErrorMessage()
@@ -112,10 +112,6 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     }
     
     public func dequeue(limit: Int64) -> [BufferRecord] {
-        defer {
-            sqlite3_finalize(context)
-        }
-        
         let query: String
         if limit < 1 {
             query = "SELECT * FROM Events ORDER BY timestamp"
@@ -123,6 +119,10 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             query = "SELECT * FROM Events ORDER BY timestamp LIMIT ?"
         }
         let context = prepare(query: query)
+        
+        defer {
+            sqlite3_finalize(context)
+        }
         
         if sqlite3_bind_int64(context, 1, Int64(limit)) != SQLITE_OK {
             assertionWithLastErrorMessage()
@@ -161,12 +161,12 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     }
     
     public func count() -> Int {
+        let query = "SELECT COUNT(*) FROM Events"
+        let context = prepare(query: query)
+        
         defer {
             sqlite3_finalize(context)
         }
-        
-        let query = "SELECT COUNT(*) FROM Events"
-        let context = prepare(query: query)
         
         if sqlite3_step(context) != SQLITE_ROW {
             assertionWithLastErrorMessage()
