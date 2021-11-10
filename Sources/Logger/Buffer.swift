@@ -45,3 +45,27 @@ public protocol TrackingEventBuffer {
     func dequeue(limit: Int64) -> [BufferRecord]
     func count() -> Int
 }
+
+final actor TrackingEventBufferAdapter {
+    private let buffer: TrackingEventBuffer
+    
+    init(_ buffer: TrackingEventBuffer) {
+        self.buffer = buffer
+    }
+    
+    func enqueue(_ e: BufferRecord) {
+        buffer.enqueue(e)
+    }
+    
+    func dequeue() -> BufferRecord? {
+        buffer.dequeue()
+    }
+    
+    func dequeue(limit: Int64) -> [BufferRecord] {
+        buffer.dequeue(limit: limit)
+    }
+    
+    func count() -> Int {
+        buffer.count()
+    }
+}
