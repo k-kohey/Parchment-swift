@@ -9,13 +9,13 @@ import Foundation
 
 public protocol Loggable {
     var eventName: String { get }
-    var parameters: [String: String] { get }
+    var parameters: [String: Any] { get }
 }
 
 
 public struct ExpandableLoggingEvent: Loggable {
     public let eventName: String
-    public let parameters: [String : String]
+    public let parameters: [String : Any]
     
     public init(eventName: String, parameters: [String : String]) {
         self.eventName = eventName

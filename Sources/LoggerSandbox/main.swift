@@ -4,6 +4,7 @@ import Foundation
 extension LoggerComponentID {
     static let mixpanel: Self = .init("Mixpanel")
     static let firebase: Self = .init("Firebase")
+    static let fail: Self = .init("fail")
 }
 
 struct MixpanelLogger: LoggerComponent {
@@ -34,6 +35,18 @@ struct FirebaseLogger: LoggerComponent {
     }
 }
 
+struct FailLogger: LoggerComponent {
+    static var id: LoggerComponentID = .fail
+    
+    func send(_ e: Loggable) -> Bool {
+        false
+    }
+    
+    func setCustomProperty(_ : [String: String]) {
+        // do anything
+    }
+}
+
 enum Event: Loggable {
     case touch(button: String)
 
@@ -41,7 +54,7 @@ enum Event: Loggable {
         "\(self)"
     }
 
-    var parameters: [String : String] {
+    var parameters: [String : Any] {
         switch self {
         case .touch(let screen):
             return ["screen": screen]
@@ -66,8 +79,8 @@ class EventQueue: TrackingEventBuffer {
         return records.first
     }
     
-    func dequeue(limit: Int) -> [BufferRecord] {
-        (0..<min(limit, records.count)).reduce([]) { result, _ in
+    func dequeue(limit: Int64) -> [BufferRecord] {
+        (0..<min(Int(limit), records.count)).reduce([]) { result, _ in
             result + [dequeue()].compactMap { $0 }
         }
     }
@@ -84,24 +97,29 @@ extension ExpandableLoggingEvent {
 // ログの送信先を宣言
 let mixpanel = MixpanelLogger()
 let firebase = FirebaseLogger()
+let fail = FailLogger()
 
 // ユーザプロパティの設定は個別に行う
 mixpanel.setCustomProperty(["user_id": "hogehoge1010"])
 
 
 func makeLogger() -> LoggerBundler {
+    Logger.Configuration.shouldPrintDebugLog = true
+    
     // イベントをプールするデータベースを宣言
     let buffer = EventQueue()
 
     // どのようなロジックでプールしたイベントをバックエンドに送信するかを宣言
-    let storategy = RegularlyBufferdEventLoggingStorategy(timeInterval: 5, limitOnNumberOfEvent: 10)
+    let storategy = RegularlyBufferdEventFlushStorategy(timeInterval: 5, limitOnNumberOfEvent: 10)
 
     // loggerの宣言
     let loggerBundler = LoggerBundler(
-        components: [mixpanel, firebase],
+        components: [mixpanel, firebase, fail],
         buffer: buffer,
         loggingStorategy: storategy
     )
+    
+    loggerBundler.configMap = [.fail: .init(allowBuffering: false)]
 
     // プールの監視を開始
     loggerBundler.startLogging()
@@ -115,8 +133,6 @@ func poolに貯めずに直ちにログを送信() {
     logger = makeLogger()
     logger.send(.impletion, with: .init(policy: .immediately))
 }
-
-
 
 func poolの限界値以上のログをためたら直ちにログを送信() {
     logger = makeLogger()
@@ -132,7 +148,7 @@ func poolにためて任意のタイミングでログを送信() {
 }
 
 
-poolにためて任意のタイミングでログを送信()
+makeLogger().send(Event.touch(button: "purchaseButton"), with: .init(policy: .immediately))
 
 // for buffering debug
 RunLoop.current.run()
