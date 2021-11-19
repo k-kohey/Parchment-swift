@@ -12,7 +12,6 @@ public protocol Loggable {
     var parameters: [String: Any] { get }
 }
 
-
 public struct ExpandableLoggingEvent: Loggable {
     public let eventName: String
     public let parameters: [String : Any]

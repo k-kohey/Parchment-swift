@@ -35,9 +35,6 @@ public class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
             guard let self = self else { return }
             self.tick(with: buffer, didFlush: didFlush)
         }
-        
-        // for debug on command line tool
-        RunLoop.current.add(timer!, forMode: .default)
     }
     
     private func tick(with buffer: TrackingEventBuffer, didFlush: @escaping ([BufferRecord])->()) {
