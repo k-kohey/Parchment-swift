@@ -59,14 +59,14 @@ public final class LoggerBundler {
             if shouldBuffering {
                 buffer.enqueue(record)
             } else if !isSucceeded {
-                console?.log("""
+                print("""
                 ⚠ The logger(id=\(logger.id.value)) failed to log an event \(record.event.eventName).
                 However, buffering is skiped because it is not allowed in the configuration.
                 """)
             }
         case .bufferingFirst:
             guard configMap[logger.id]?.allowBuffering != .some(false) else {
-                console?.log("""
+                print("""
                 ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
                 BufferingFirst policy has been selected in options, but the logger does not allow buffering.
                 """)

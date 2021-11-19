@@ -46,7 +46,7 @@ public class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
         let flush = {
             let records = buffer.dequeue(limit: .max)
             
-            console?.log("✨ Flush \(records.count) event")
+            print("✨ Flush \(records.count) event")
             didFlush(records)
         }
         
