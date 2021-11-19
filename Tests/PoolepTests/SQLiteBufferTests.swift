@@ -1,12 +1,12 @@
 import XCTest
 import class Foundation.Bundle
-@testable import Logger
+@testable import Poolep
 
 final class SQLiteBufferTests: XCTestCase {
     private var buffer: SQLiteBuffer!
     
     static override func setUp() {
-        Logger.Configuration.shouldPrintDebugLog = true
+        Configuration.shouldPrintDebugLog = true
     }
     
     override func setUp() {

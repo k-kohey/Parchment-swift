@@ -18,11 +18,9 @@ public class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
     let limitOnNumberOfEvent: Int
     
     var lastFlushedDate: Date = Date()
-    
+
     private var timer: Timer?
-    private let dispatchQueue: DispatchQueue
-    
-    
+        
     public init(
         timeInterval: TimeInterval,
         limitOnNumberOfEvent: Int = .max,
@@ -30,7 +28,6 @@ public class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
     ) {
         self.timeInterval = timeInterval
         self.limitOnNumberOfEvent = limitOnNumberOfEvent
-        self.dispatchQueue = dispatchQueue ?? .readWrite
     }
     
     public func schedule(with buffer: TrackingEventBuffer, didFlush: @escaping ([BufferRecord])->()) {
@@ -44,27 +41,25 @@ public class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
     }
     
     private func tick(with buffer: TrackingEventBuffer, didFlush: @escaping ([BufferRecord])->()) {
-        self.dispatchQueue.async { [weak self] in
-            guard let self = self, buffer.count() > 0 else { return }
+        guard buffer.count() > 0 else { return }
+        
+        let flush = {
+            let records = buffer.dequeue(limit: .max)
             
-            let flush = {
-                let records = buffer.dequeue(limit: .max)
-                
-                console?.log("✨ Flush \(records.count) event")
-                didFlush(records)
-            }
-            
-            if self.limitOnNumberOfEvent < buffer.count() {
-                flush()
-                return
-            }
-            
-            let timeSinceLastFlush = abs(self.lastFlushedDate.timeIntervalSinceNow)
-            if self.timeInterval < timeSinceLastFlush {
-                flush()
-                self.lastFlushedDate = Date()
-                return
-            }
+            console?.log("✨ Flush \(records.count) event")
+            didFlush(records)
+        }
+        
+        if self.limitOnNumberOfEvent < buffer.count() {
+            flush()
+            return
+        }
+        
+        let timeSinceLastFlush = abs(self.lastFlushedDate.timeIntervalSinceNow)
+        if self.timeInterval < timeSinceLastFlush {
+            flush()
+            self.lastFlushedDate = Date()
+            return
         }
     }
 }
