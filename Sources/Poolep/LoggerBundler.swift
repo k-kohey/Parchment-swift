@@ -1,10 +1,9 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by k-kohey on 2021/09/27.
 //
-
 import Foundation
 
 struct DateProvider {
@@ -17,7 +16,7 @@ struct DateProvider {
 
 public final class LoggerBundler {
     private let components: [LoggerComponent]
-    private let buffer: TrackingEventBuffer
+    private let buffer: TrackingEventBufferAdapter
     private let flushStorategy: BufferdEventFlushStorategy
     
     public var configMap: [LoggerComponentID: Configuration] = [:]
@@ -28,11 +27,11 @@ public final class LoggerBundler {
         loggingStorategy: BufferdEventFlushStorategy = RegularlyBufferdEventFlushStorategy.default
     ) {
         self.components = components
-        self.buffer = buffer
+        self.buffer = .init(buffer)
         self.flushStorategy = loggingStorategy
     }
     
-    public func send(_ event: Loggable, with option: LoggingOption = .init()) {
+    public func send(_ event: Loggable, with option: LoggingOption = .init()) async {
         let loggers: [LoggerComponent] = {
             if let scope = option.scope {
                 return components[scope]
@@ -41,23 +40,23 @@ public final class LoggerBundler {
             }
         }()
         
-        loggers.forEach { logger in
+        for logger in loggers {
             let record = BufferRecord(
                 destination: logger.id.value,
                 event: event,
                 timestamp: DateProvider.current()
             )
-            send(record, using: logger, with: option)
+            await send(record, using: logger, with: option)
         }
     }
     
-    private func send(_ record: BufferRecord, using logger: LoggerComponent, with option: LoggingOption = .init()) {
+    private func send(_ record: BufferRecord, using logger: LoggerComponent, with option: LoggingOption = .init()) async {
         switch option.policy {
         case .immediately:
-            let isSucceeded = logger.send(record.event)
+            let isSucceeded = await logger.send(record.event)
             let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
             if shouldBuffering {
-                buffer.enqueue(record)
+                await buffer.enqueue(record)
             } else if !isSucceeded {
                 print("""
                 ⚠ The logger(id=\(logger.id.value)) failed to log an event \(record.event.eventName).
@@ -72,26 +71,20 @@ public final class LoggerBundler {
                 """)
                 return
             }
-            buffer.enqueue(record)
+            await buffer.enqueue(record)
         }
     }
     
-    public func startLogging() {
-        flushStorategy.schedule(with: buffer) { [weak self] records in
-            guard let self = self else {
-                assertionFailure("""
-                LoggerBundler instance should been retainted by any objects for logging.
-                Logging cannot be performed in this state.
-                """)
-                return
-            }
-            
-            records.forEach {
-                self.send(
-                    $0,
-                    using: self.components[.init($0.destination)]
+    public func startLogging() async {
+        do {
+            for try await record in flushStorategy.schedule(with: buffer) {
+                await send(
+                    record,
+                    using: components[.init(record.destination)]
                 )
             }
+        } catch {
+            print("error: \(error.localizedDescription)")
         }
     }
 }
@@ -132,8 +125,8 @@ public extension LoggerBundler {
 }
 
 public extension LoggerBundler {
-    func send(_ event: ExpandableLoggingEvent, with option: LoggingOption = .init()) {
-        send(event as Loggable, with: option)
+    func send(_ event: ExpandableLoggingEvent, with option: LoggingOption = .init()) async {
+        await send(event as Loggable, with: option)
     }
 }
 

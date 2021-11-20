@@ -46,7 +46,7 @@ public protocol TrackingEventBuffer {
     func count() -> Int
 }
 
-final actor TrackingEventBufferAdapter {
+final public actor TrackingEventBufferAdapter {
     private let buffer: TrackingEventBuffer
     
     init(_ buffer: TrackingEventBuffer) {

@@ -1,10 +1,9 @@
-// 
+//
 //  File.swift
-//  
+//
 //
 //  Created by k-kohey on 2021/10/12.
 //
-
 import Foundation
 
 public struct LoggerComponentID: Hashable {
@@ -17,7 +16,7 @@ public struct LoggerComponentID: Hashable {
 
 public protocol LoggerComponent {
     static var id: LoggerComponentID { get }
-    func send(_: Loggable) -> Bool
+    func send(_: Loggable) async -> Bool
 }
 
 extension LoggerComponent {
