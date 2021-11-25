@@ -75,16 +75,22 @@ public final class LoggerBundler {
         }
     }
     
-    public func startLogging() async {
-        do {
-            for try await record in flushStorategy.schedule(with: buffer) {
-                await send(
-                    record,
-                    using: components[.init(record.destination)]
-                )
+    public func startLogging() {
+        Task.detached { [weak self] in
+            guard let self = self else {
+                assertionFailure("LoggerBundler instance should been retained by any object due to log events definitely")
+                return
             }
-        } catch {
-            print("error: \(error.localizedDescription)")
+            do {
+                for try await record in self.flushStorategy.schedule(with: self.buffer) {
+                    await self.send(
+                        record,
+                        using: self.components[.init(record.destination)]
+                    )
+                }
+            } catch {
+                print("error: \(error.localizedDescription)")
+            }
         }
     }
 }
