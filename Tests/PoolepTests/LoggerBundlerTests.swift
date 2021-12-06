@@ -59,11 +59,10 @@ class LoggerBundlerTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testSend_whenPolicyIsImmediately() async throws {
+    func testSendImmediately() async throws {
         let logger = LoggerMock()
         let buffer = EventQueueMock()
         let bundler = LoggerBundler(components: [logger], buffer: buffer)
-        bundler.startLogging()
         
         var didSend = false
         logger._send = {
@@ -79,17 +78,15 @@ class LoggerBundlerTests: XCTestCase {
         XCTAssertTrue(didSend)
     }
     
-    func testSend_whenPolicyIsBufferingFirst() async throws {
+    func testSendAfterBuffering() async throws {
         let logger = LoggerMock()
         let buffer = EventQueueMock()
         let bundler = LoggerBundler(components: [logger], buffer: buffer)
-        bundler.startLogging()
         
         await bundler.send(
             ExpandableLoggingEvent(eventName: "hoge", parameters: [:]),
             with: .init(policy: .bufferingFirst)
         )
-        
         XCTAssertEqual(buffer.count(), 1)
     }
 }

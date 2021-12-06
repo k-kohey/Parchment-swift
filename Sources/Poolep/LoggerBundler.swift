@@ -23,7 +23,7 @@ public final class LoggerBundler {
     
     public init(
         components: [LoggerComponent],
-        buffer: TrackingEventBuffer,
+        buffer: TrackingEventBuffer = try! SQLiteBuffer(),
         loggingStorategy: BufferdEventFlushStorategy = RegularlyBufferdEventFlushStorategy.default
     ) {
         self.components = components

@@ -16,7 +16,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     
     private var dbPointer: OpaquePointer?
     
-    init() throws {
+    public init() throws {
         let dbFilePath = try FileManager.default.url(
             for: .documentDirectory,
             in: .userDomainMask,

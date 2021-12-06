@@ -10,7 +10,7 @@ public protocol BufferdEventFlushStorategy {
     func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->())
 }
 
-public class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
+public final class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
     public static let `default` = RegularlyBufferdEventFlushStorategy(timeInterval: 60)
     
     let timeInterval: TimeInterval
