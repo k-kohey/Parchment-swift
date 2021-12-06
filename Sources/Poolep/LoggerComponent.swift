@@ -14,9 +14,14 @@ public struct LoggerComponentID: Hashable {
     }
 }
 
+public protocol LoggerSendable {
+    var event: Loggable { get }
+    var timestamp: Date { get }
+}
+
 public protocol LoggerComponent {
     static var id: LoggerComponentID { get }
-    func send(_: Loggable) async -> Bool
+    func send(_: LoggerSendable) async -> Bool
 }
 
 extension LoggerComponent {

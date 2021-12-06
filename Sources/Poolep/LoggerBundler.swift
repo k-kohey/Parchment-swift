@@ -53,7 +53,7 @@ public final class LoggerBundler {
     private func send(_ record: BufferRecord, using logger: LoggerComponent, with option: LoggingOption = .init()) async {
         switch option.policy {
         case .immediately:
-            let isSucceeded = await logger.send(record.event)
+            let isSucceeded = await logger.send(record)
             let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
             if shouldBuffering {
                 await buffer.enqueue(record)
@@ -148,16 +148,5 @@ private extension Sequence where Element == LoggerComponent {
     
     subscript(id: LoggerComponentID) -> Element {
         first(where: { $0.id == id })!
-    }
-}
-
-private extension BufferRecord {
-    struct Event: Loggable {
-        public let eventName: String
-        public let parameters: [String: Any]
-    }
-    
-    var event: Event {
-        .init(eventName: eventName, parameters: parameters)
     }
 }

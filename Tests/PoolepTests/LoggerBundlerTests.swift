@@ -17,7 +17,7 @@ final class LoggerMock: LoggerComponent {
     
     var _send: (()->(Bool))?
     
-    func send(_: Loggable) async -> Bool {
+    func send(_: LoggerSendable) async -> Bool {
         _send?() ?? true
     }
 }

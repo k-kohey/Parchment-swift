@@ -7,12 +7,12 @@
 
 import Foundation
 
-public struct BufferRecord: Loggable, Equatable {
+public struct BufferRecord: Loggable, LoggerSendable, Equatable {
     public let id: String
     public let destination: String
     public let eventName: String
     public let parameters: [String: Any]
-    let timestamp: Date
+    public let timestamp: Date
     
     init(id: String = UUID().uuidString, destination: String, event: Loggable, timestamp: Date) {
         self.id = id
@@ -36,6 +36,17 @@ public struct BufferRecord: Loggable, Equatable {
             && lhs.eventName == rhs.eventName
             && (lhs.parameters as NSDictionary).isEqual(to: rhs.parameters)
             && lhs.timestamp == rhs.timestamp
+    }
+}
+
+extension BufferRecord {
+    private struct Event: Loggable {
+        public let eventName: String
+        public let parameters: [String: Any]
+    }
+    
+    public var event: Loggable {
+        Event(eventName: eventName, parameters: parameters)
     }
 }
 
