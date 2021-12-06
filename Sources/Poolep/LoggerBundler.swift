@@ -46,20 +46,20 @@ public final class LoggerBundler {
                 event: event,
                 timestamp: DateProvider.current()
             )
-            await send(record, using: logger, with: option)
+            await send([record], using: logger, with: option)
         }
     }
     
-    private func send(_ record: BufferRecord, using logger: LoggerComponent, with option: LoggingOption = .init()) async {
+    private func send(_ records: [BufferRecord], using logger: LoggerComponent, with option: LoggingOption = .init()) async {
         switch option.policy {
         case .immediately:
-            let isSucceeded = await logger.send(record)
+            let isSucceeded = await logger.send(records)
             let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
             if shouldBuffering {
-                await buffer.enqueue(record)
+                await buffer.enqueue(records)
             } else if !isSucceeded {
                 print("""
-                ⚠ The logger(id=\(logger.id.value)) failed to log an event \(record.event.eventName).
+                ⚠ The logger(id=\(logger.id.value)) failed to log an event.
                 However, buffering is skiped because it is not allowed in the configuration.
                 """)
             }
@@ -71,7 +71,7 @@ public final class LoggerBundler {
                 """)
                 return
             }
-            await buffer.enqueue(record)
+            await buffer.enqueue(records)
         }
     }
     
@@ -82,11 +82,17 @@ public final class LoggerBundler {
                 return
             }
             do {
-                for try await record in self.flushStorategy.schedule(with: self.buffer) {
-                    await self.send(
-                        record,
-                        using: self.components[.init(record.destination)]
-                    )
+                for try await records in self.flushStorategy.schedule(with: self.buffer) {
+                    let recordEachLogger = Dictionary(grouping: records) { record in
+                        record.destination
+                    }
+                    
+                    for (destination, records) in recordEachLogger {
+                        await self.send(
+                            records,
+                            using: self.components[.init(destination)]
+                        )
+                    }
                 }
             } catch {
                 print("error: \(error.localizedDescription)")

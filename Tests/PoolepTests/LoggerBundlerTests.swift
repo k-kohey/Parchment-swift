@@ -9,15 +9,26 @@ import XCTest
 @testable import Poolep
 
 private extension LoggerComponentID {
-    static let mock = LoggerComponentID("mock")
+    static let a = LoggerComponentID("A")
+    static let b = LoggerComponentID("B")
 }
 
-final class LoggerMock: LoggerComponent {
-    static let id: LoggerComponentID = .mock
+final class LoggerA: LoggerComponent {
+    static let id: LoggerComponentID = .a
     
     var _send: (()->(Bool))?
     
-    func send(_: LoggerSendable) async -> Bool {
+    func send(_: [LoggerSendable]) async -> Bool {
+        _send?() ?? true
+    }
+}
+
+final class LoggerB: LoggerComponent {
+    static let id: LoggerComponentID = .b
+    
+    var _send: (()->(Bool))?
+    
+    func send(_: [LoggerSendable]) async -> Bool {
         _send?() ?? true
     }
 }
@@ -25,27 +36,28 @@ final class LoggerMock: LoggerComponent {
 final class EventQueueMock: TrackingEventBuffer {
     private var records: [BufferRecord] = []
     
-    func enqueue(_ e: BufferRecord) {
-        records.append(e)
-    }
-    
-    func dequeue() -> BufferRecord? {
-        defer {
-            if !records.isEmpty {
-                records.removeFirst()
-            }
-        }
-        return records.first
+    func enqueue(_ e: [BufferRecord]) {
+        records += e
     }
     
     func dequeue(limit: Int64) -> [BufferRecord] {
-        (0..<min(Int(limit), records.count)).reduce([]) { result, _ in
+        let count = 0 < limit ? Int(limit) : records.count
+        return (0..<min(count, records.count)).reduce([]) { result, _ in
             result + [dequeue()].compactMap { $0 }
         }
     }
     
     func count() -> Int {
         records.count
+    }
+    
+    private func dequeue() -> BufferRecord? {
+        defer {
+            if !records.isEmpty {
+                records.removeFirst()
+            }
+        }
+        return records.first
     }
 }
 
@@ -66,7 +78,7 @@ final class BufferdEventFlushStorategyMock: BufferdEventFlushScheduler {
 
 class LoggerBundlerTests: XCTestCase {
     func testSendImmediately() async throws {
-        let logger = LoggerMock()
+        let logger = LoggerA()
         let buffer = EventQueueMock()
         let bundler = LoggerBundler(components: [logger], buffer: buffer)
         
@@ -85,7 +97,7 @@ class LoggerBundlerTests: XCTestCase {
     }
     
     func testSendAfterBuffering() async throws {
-        let logger = LoggerMock()
+        let logger = LoggerA()
         let buffer = EventQueueMock()
         let storategy = BufferdEventFlushStorategyMock()
         let bundler = LoggerBundler(
@@ -109,5 +121,34 @@ class LoggerBundlerTests: XCTestCase {
         await storategy.flush()
         
         XCTAssertEqual(buffer.count(), 0)
+    }
+    
+    func testSendOnlyOneSideLogger() async throws {
+        let loggerA = LoggerA()
+        let loggerB = LoggerB()
+        let buffer = EventQueueMock()
+        let bundler = LoggerBundler(
+            components: [loggerA, loggerB],
+            buffer: buffer
+        )
+        
+        var didSendFromLoggerA = false
+        loggerA._send = {
+            didSendFromLoggerA = true
+            return didSendFromLoggerA
+        }
+        var didSendFromLoggerB = false
+        loggerB._send = {
+            didSendFromLoggerB = true
+            return didSendFromLoggerB
+        }
+        
+        await bundler.send(
+            ExpandableLoggingEvent(eventName: "hoge", parameters: [:]),
+            with: .init(policy: .immediately, scope: .only([loggerA.id]))
+        )
+        
+        XCTAssertEqual(didSendFromLoggerA, true)
+        XCTAssertEqual(didSendFromLoggerB, false)
     }
 }

@@ -43,7 +43,7 @@ public final class RegularlyPollingScheduler: BufferdEventFlushScheduler {
         guard await buffer.count() > 0 else { return }
         
         let flush = {
-            let records = await buffer.dequeue(limit: .max)
+            let records = await buffer.dequeue()
             
             print("✨ Flush \(records.count) event")
             didFlush(records)
@@ -65,12 +65,10 @@ public final class RegularlyPollingScheduler: BufferdEventFlushScheduler {
 }
 
 extension BufferdEventFlushScheduler {
-    func schedule(with buffer: TrackingEventBufferAdapter) -> AsyncThrowingStream<BufferRecord, Error> {
+    func schedule(with buffer: TrackingEventBufferAdapter) -> AsyncThrowingStream<[BufferRecord], Error> {
         AsyncThrowingStream { continuation in
             schedule(with: buffer) {
-                for record in $0 {
-                    continuation.yield(record)
-                }
+                continuation.yield($0)
             }
         }
     }

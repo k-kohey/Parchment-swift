@@ -20,7 +20,7 @@ class RegularlyPollingSchedulerTests: XCTestCase {
             result = record
             exp.fulfill()
         }
-        buffer.enqueue(.init(destination: "hoge", event: event, timestamp: Date()))
+        buffer.enqueue([.init(destination: "hoge", event: event, timestamp: Date())])
         
         wait(for: [exp], timeout: 1.1)
         XCTAssertEqual(event.eventName, result.first?.eventName)

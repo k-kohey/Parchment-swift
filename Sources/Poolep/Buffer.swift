@@ -51,10 +51,15 @@ extension BufferRecord {
 }
 
 public protocol TrackingEventBuffer {
-    func enqueue(_ e: BufferRecord)
-    func dequeue() -> BufferRecord?
+    func enqueue(_ e: [BufferRecord])
     func dequeue(limit: Int64) -> [BufferRecord]
     func count() -> Int
+}
+
+extension TrackingEventBuffer {
+    func dequeue() -> [BufferRecord] {
+        dequeue(limit: -1)
+    }
 }
 
 final public actor TrackingEventBufferAdapter {
@@ -64,15 +69,11 @@ final public actor TrackingEventBufferAdapter {
         self.buffer = buffer
     }
     
-    func enqueue(_ e: BufferRecord) {
+    func enqueue(_ e: [BufferRecord]) {
         buffer.enqueue(e)
     }
     
-    func dequeue() -> BufferRecord? {
-        buffer.dequeue()
-    }
-    
-    func dequeue(limit: Int64) -> [BufferRecord] {
+    func dequeue(limit: Int64 = -1) -> [BufferRecord] {
         buffer.dequeue(limit: limit)
     }
     

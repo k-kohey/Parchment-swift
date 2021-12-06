@@ -21,7 +21,7 @@ public protocol LoggerSendable {
 
 public protocol LoggerComponent {
     static var id: LoggerComponentID { get }
-    func send(_: LoggerSendable) async -> Bool
+    func send(_: [LoggerSendable]) async -> Bool
 }
 
 extension LoggerComponent {

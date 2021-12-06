@@ -49,7 +49,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         }
     }
     
-    public func enqueue(_ e: BufferRecord) {
+    public func enqueue(_ e: [BufferRecord]) {
         let query = """
         INSERT INTO Events (
             id,
@@ -57,7 +57,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             timestamp,
             eventName,
             parameters
-        ) VALUES (?, ?, ?, ?, ?)
+        ) VALUES \(e.map { _ in "(?, ?, ?, ?, ?)" }.joined(separator: ", "))
         """
         
         let context = prepare(query: query)
@@ -66,39 +66,46 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             sqlite3_finalize(context)
         }
         
-        if sqlite3_bind_text(context, 1, e.id.utf8String, -1, nil) != SQLITE_OK {
-            assertionWithLastErrorMessage()
-            return
-        }
-        
-        if sqlite3_bind_text(context, 2, e.destination.utf8String, -1, nil) != SQLITE_OK {
-            assertionWithLastErrorMessage()
-            return
-        }
-        
-        if sqlite3_bind_int64(context, 3, sqlite3_int64(e.timestamp.timeIntervalSince1970)) != SQLITE_OK {
-            assertionWithLastErrorMessage()
-            return
-        }
-        
-        if sqlite3_bind_text(context, 4, e.eventName.utf8String, -1, nil) != SQLITE_OK {
-            assertionWithLastErrorMessage()
-            return
-        }
-        
-        do {
-            let parameters = try JSONSerialization.data(withJSONObject: e.parameters)
-            if let string = String(data: parameters, encoding: .utf8), sqlite3_bind_text(context, 5, string, -1, nil) != SQLITE_OK {
+        for (index, e) in e.enumerated() {
+            let valueIndex = { (offset: Int) -> Int32 in
+                let numberOfColumns = 5
+                return Int32(index * numberOfColumns + offset)
+            }
+            if sqlite3_bind_text(context, valueIndex(1), e.id.utf8String, -1, nil) != SQLITE_OK {
                 assertionWithLastErrorMessage()
                 return
             }
+            
+            if sqlite3_bind_text(context, valueIndex(2), e.destination.utf8String, -1, nil) != SQLITE_OK {
+                assertionWithLastErrorMessage()
+                return
+            }
+            
+            if sqlite3_bind_int64(context, valueIndex(3), sqlite3_int64(e.timestamp.timeIntervalSince1970)) != SQLITE_OK {
+                assertionWithLastErrorMessage()
+                return
+            }
+            
+            if sqlite3_bind_text(context, valueIndex(4), e.eventName.utf8String, -1, nil) != SQLITE_OK {
+                assertionWithLastErrorMessage()
+                return
+            }
+            
+            do {
+                let parameters = try JSONSerialization.data(withJSONObject: e.parameters)
+                if
+                    let string = String(data: parameters, encoding: .utf8),
+                    sqlite3_bind_text(context, valueIndex(5), string, -1, nil) != SQLITE_OK
+                {
+                    assertionWithLastErrorMessage()
+                    return
+                }
+            }
+            catch {
+                assertionFailure("\(error).")
+                return
+            }
         }
-        catch {
-            assertionFailure("\(error).")
-            return
-        }
-        
-        
         
         if sqlite3_step(context) != SQLITE_DONE {
             assertionWithLastErrorMessage()
@@ -106,13 +113,9 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         }
     }
     
-    public func dequeue() -> BufferRecord? {
-        dequeue(limit: 1).first
-    }
-    
     public func dequeue(limit: Int64) -> [BufferRecord] {
         let query: String
-        if limit < 1 {
+        if limit < 0 {
             query = "SELECT * FROM Events ORDER BY timestamp"
         } else {
             query = "SELECT * FROM Events ORDER BY timestamp LIMIT ?"
@@ -123,7 +126,8 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             sqlite3_finalize(context)
         }
         
-        if sqlite3_bind_int64(context, 1, Int64(limit)) != SQLITE_OK {
+        
+        if 0 < limit, sqlite3_bind_int64(context, 1, Int64(limit)) != SQLITE_OK {
             assertionWithLastErrorMessage()
             return []
         }
