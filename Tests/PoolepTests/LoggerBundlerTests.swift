@@ -49,7 +49,7 @@ final class EventQueueMock: TrackingEventBuffer {
     }
 }
 
-final class BufferdEventFlushStorategyMock: BufferdEventFlushStorategy {
+final class BufferdEventFlushStorategyMock: BufferdEventFlushScheduler {
     private var didFlush: (([BufferRecord]) -> ())? = nil
     private var buffer: TrackingEventBufferAdapter?
     

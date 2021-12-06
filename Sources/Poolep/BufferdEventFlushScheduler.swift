@@ -6,12 +6,12 @@
 //
 import Foundation
 
-public protocol BufferdEventFlushStorategy {
+public protocol BufferdEventFlushScheduler {
     func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->())
 }
 
-public final class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorategy {
-    public static let `default` = RegularlyBufferdEventFlushStorategy(timeInterval: 60)
+public final class RegularlyPollingScheduler: BufferdEventFlushScheduler {
+    public static let `default` = RegularlyPollingScheduler(timeInterval: 60)
     
     let timeInterval: TimeInterval
     let limitOnNumberOfEvent: Int
@@ -64,7 +64,7 @@ public final class RegularlyBufferdEventFlushStorategy: BufferdEventFlushStorate
     }
 }
 
-extension BufferdEventFlushStorategy {
+extension BufferdEventFlushScheduler {
     func schedule(with buffer: TrackingEventBufferAdapter) -> AsyncThrowingStream<BufferRecord, Error> {
         AsyncThrowingStream { continuation in
             schedule(with: buffer) {

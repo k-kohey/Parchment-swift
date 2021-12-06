@@ -17,14 +17,14 @@ struct DateProvider {
 public final class LoggerBundler {
     private let components: [LoggerComponent]
     private let buffer: TrackingEventBufferAdapter
-    private let flushStorategy: BufferdEventFlushStorategy
+    private let flushStorategy: BufferdEventFlushScheduler
     
     public var configMap: [LoggerComponentID: Configuration] = [:]
     
     public init(
         components: [LoggerComponent],
         buffer: TrackingEventBuffer = try! SQLiteBuffer(),
-        loggingStorategy: BufferdEventFlushStorategy = RegularlyBufferdEventFlushStorategy.default
+        loggingStorategy: BufferdEventFlushScheduler = RegularlyPollingScheduler.default
     ) {
         self.components = components
         self.buffer = .init(buffer)
