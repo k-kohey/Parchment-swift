@@ -90,7 +90,6 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             let parameters = try JSONSerialization.data(withJSONObject: e.parameters)
             if let string = String(data: parameters, encoding: .utf8), sqlite3_bind_text(context, 5, string, -1, nil) != SQLITE_OK {
                 assertionWithLastErrorMessage()
-                
                 return
             }
         }
@@ -157,7 +156,8 @@ public final class SQLiteBuffer: TrackingEventBuffer {
 
         }
         
-        return result
+        let success = delete(result.map(\.id))
+        return success ? result : []
     }
     
     public func count() -> Int {
@@ -193,6 +193,32 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         }
         
         return context
+    }
+    
+    private func delete(_ IDs: [String]) -> Bool {
+        let query = """
+        DELETE FROM Events WHERE \(IDs.map { _ in "id = ?" }.joined(separator:  " OR "))
+        """
+        
+        let context = prepare(query: query)
+        
+        defer {
+            sqlite3_finalize(context)
+        }
+        
+        for (index, id) in IDs.enumerated() {
+            if sqlite3_bind_text(context, Int32(index + 1), id.utf8String, -1, nil) != SQLITE_OK {
+                assertionWithLastErrorMessage()
+                return false
+            }
+        }
+        
+        if sqlite3_step(context) != SQLITE_DONE {
+            assertionWithLastErrorMessage()
+            return false
+        } else {
+            return true
+        }
     }
     
     private func assertionWithLastErrorMessage() {

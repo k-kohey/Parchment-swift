@@ -18,10 +18,10 @@ final class SQLiteBufferTests: XCTestCase {
         let record = BufferRecord(destination: "hoge", eventName: "a", parameters: [:], timestamp: .init(timeIntervalSince1970: 0))
 
         buffer.enqueue(record)
-        let recors = buffer.dequeue(limit: 1)
+        let results = buffer.dequeue(limit: 1)
         
-        XCTAssertEqual(recors.count, 1)
-        XCTAssertEqual(recors.first, record)
+        XCTAssertEqual(results.first, record)
+        XCTAssertEqual(buffer.count(), 0)
     }
     
     func testDequeue_whenMultipleRecordsWereInserted() {
@@ -33,6 +33,7 @@ final class SQLiteBufferTests: XCTestCase {
         
         let results = buffer.dequeue(limit: .max)
         XCTAssertEqual(results, records)
+        XCTAssertEqual(buffer.count(), 0)
     }
     
     func testCount() {
