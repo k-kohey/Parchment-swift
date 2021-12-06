@@ -49,6 +49,21 @@ final class EventQueueMock: TrackingEventBuffer {
     }
 }
 
+final class BufferdEventFlushStorategyMock: BufferdEventFlushStorategy {
+    private var didFlush: (([BufferRecord]) -> ())? = nil
+    private var buffer: TrackingEventBufferAdapter?
+    
+    func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord]) -> ()) {
+        self.didFlush = didFlush
+        self.buffer = buffer
+    }
+    
+    func flush() async {
+        await didFlush!(buffer!.dequeue(limit: .max))
+        
+    }
+}
+
 class LoggerBundlerTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -81,12 +96,27 @@ class LoggerBundlerTests: XCTestCase {
     func testSendAfterBuffering() async throws {
         let logger = LoggerMock()
         let buffer = EventQueueMock()
-        let bundler = LoggerBundler(components: [logger], buffer: buffer)
+        let storategy = BufferdEventFlushStorategyMock()
+        let bundler = LoggerBundler(
+            components: [logger],
+            buffer: buffer,
+            loggingStorategy: storategy
+        )
+        
+        bundler.startLogging()
         
         await bundler.send(
             ExpandableLoggingEvent(eventName: "hoge", parameters: [:]),
             with: .init(policy: .bufferingFirst)
         )
-        XCTAssertEqual(buffer.count(), 1)
+        await bundler.send(
+            ExpandableLoggingEvent(eventName: "fuga", parameters: [:]),
+            with: .init(policy: .bufferingFirst)
+        )
+        XCTAssertEqual(buffer.count(), 2)
+        
+        await storategy.flush()
+        
+        XCTAssertEqual(buffer.count(), 0)
     }
 }
