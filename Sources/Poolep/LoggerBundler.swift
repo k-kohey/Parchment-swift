@@ -58,14 +58,14 @@ public final class LoggerBundler {
             if shouldBuffering {
                 await buffer.enqueue(records)
             } else if !isSucceeded {
-                print("""
+                console()?.log("""
                 ⚠ The logger(id=\(logger.id.value)) failed to log an event.
                 However, buffering is skiped because it is not allowed in the configuration.
                 """)
             }
         case .bufferingFirst:
             guard configMap[logger.id]?.allowBuffering != .some(false) else {
-                print("""
+                console()?.log("""
                 ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
                 BufferingFirst policy has been selected in options, but the logger does not allow buffering.
                 """)
@@ -78,7 +78,7 @@ public final class LoggerBundler {
     public func startLogging() {
         Task.detached { [weak self] in
             guard let self = self else {
-                assertionFailure("LoggerBundler instance should been retained by any object due to log events definitely")
+                assertionIfDebugMode("LoggerBundler instance should been retained by any object due to log events definitely")
                 return
             }
             do {
@@ -95,7 +95,7 @@ public final class LoggerBundler {
                     }
                 }
             } catch {
-                print("error: \(error.localizedDescription)")
+                console()?.log("error: \(error.localizedDescription)")
             }
         }
     }
@@ -137,7 +137,11 @@ public extension LoggerBundler {
 }
 
 public extension LoggerBundler {
-    func send(_ event: ExpandableLoggingEvent, with option: LoggingOption = .init()) async {
+    func send(_ event: TrackingEvent, with option: LoggingOption = .init()) async {
+        await send(event as Loggable, with: option)
+    }
+    
+    func send(_ event: [PartialKeyPath<Loggable>: Any], with option: LoggingOption = .init()) async {
         await send(event as Loggable, with: option)
     }
 }

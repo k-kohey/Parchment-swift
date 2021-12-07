@@ -39,13 +39,12 @@ public final class RegularlyPollingScheduler: BufferdEventFlushScheduler {
     }
     
     private func tick(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->()) async {
-        print("tick")
         guard await buffer.count() > 0 else { return }
         
         let flush = {
             let records = await buffer.dequeue()
             
-            print("✨ Flush \(records.count) event")
+            console()?.log("✨ Flush \(records.count) event")
             didFlush(records)
         }
         

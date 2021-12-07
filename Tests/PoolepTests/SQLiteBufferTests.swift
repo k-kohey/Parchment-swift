@@ -6,7 +6,7 @@ final class SQLiteBufferTests: XCTestCase {
     private var buffer: SQLiteBuffer!
     
     static override func setUp() {
-        Configuration.shouldPrintDebugLog = true
+        Configuration.debugMode = true
     }
     
     override func setUp() {

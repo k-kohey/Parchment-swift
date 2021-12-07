@@ -89,7 +89,7 @@ class LoggerBundlerTests: XCTestCase {
         }
         
         await bundler.send(
-            ExpandableLoggingEvent(eventName: "hoge", parameters: [:]),
+            TrackingEvent(eventName: "hoge", parameters: [:]),
             with: .init(policy: .immediately)
         )
         
@@ -109,11 +109,11 @@ class LoggerBundlerTests: XCTestCase {
         bundler.startLogging()
         
         await bundler.send(
-            ExpandableLoggingEvent(eventName: "hoge", parameters: [:]),
+            TrackingEvent(eventName: "hoge", parameters: [:]),
             with: .init(policy: .bufferingFirst)
         )
         await bundler.send(
-            ExpandableLoggingEvent(eventName: "fuga", parameters: [:]),
+            TrackingEvent(eventName: "fuga", parameters: [:]),
             with: .init(policy: .bufferingFirst)
         )
         XCTAssertEqual(buffer.count(), 2)
@@ -144,7 +144,7 @@ class LoggerBundlerTests: XCTestCase {
         }
         
         await bundler.send(
-            ExpandableLoggingEvent(eventName: "hoge", parameters: [:]),
+            TrackingEvent(eventName: "hoge", parameters: [:]),
             with: .init(policy: .immediately, scope: .only([loggerA.id]))
         )
         

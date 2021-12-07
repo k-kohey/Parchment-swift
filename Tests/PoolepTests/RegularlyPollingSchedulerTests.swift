@@ -12,7 +12,7 @@ class RegularlyPollingSchedulerTests: XCTestCase {
     func testSchedule() throws {
         let scheduler = RegularlyPollingScheduler(timeInterval: 0.1)
         let buffer = EventQueueMock()
-        let event = ExpandableLoggingEvent(eventName: "hoge", parameters: [:])
+        let event = TrackingEvent(eventName: "hoge", parameters: [:])
         let exp = expectation(description: "wait")
         
         var result: [BufferRecord] = []

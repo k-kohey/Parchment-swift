@@ -12,18 +12,22 @@ public protocol Loggable {
     var parameters: [String: Any] { get }
 }
 
-public struct ExpandableLoggingEvent: Loggable {
+public struct TrackingEvent: Loggable {
     public let eventName: String
     public let parameters: [String : Any]
     
-    public init(eventName: String, parameters: [String : String]) {
+    public init(eventName: String, parameters: [String : Any]) {
         self.eventName = eventName
         self.parameters = parameters
     }
 }
 
-public extension ExpandableLoggingEvent {
-    static func screenStart(name: String) -> ExpandableLoggingEvent {
-        .init(eventName: "screenStart", parameters: ["name": name])
+extension Dictionary: Loggable where Key == PartialKeyPath<Loggable> {
+    public var eventName: String {
+        self[\.eventName] as? String ?? ""
+    }
+    
+    public var parameters: [String : Any] {
+        self[\.parameters] as? [String : Any] ?? [:]
     }
 }

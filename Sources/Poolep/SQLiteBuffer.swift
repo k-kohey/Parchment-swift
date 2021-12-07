@@ -24,7 +24,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             create: false
         ).appendingPathComponent("Events.db")
         
-        print("Events.db is created on \(dbFilePath.absoluteString)")
+        console()?.log("Events.db is created on \(dbFilePath.absoluteString)")
         
         if sqlite3_open(dbFilePath.path, &dbPointer) != SQLITE_OK {
             throw SQLiteBufferError.dbfileCanNotBeenOpend
@@ -102,7 +102,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
                 }
             }
             catch {
-                assertionFailure("\(error).")
+                assertionIfDebugMode("\(error).")
                 return
             }
         }
@@ -227,12 +227,11 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     
     private func assertionWithLastErrorMessage() {
         let error = String(cString: sqlite3_errmsg(dbPointer))
-        assertionFailure("\(error).This is probably a programming error.")
+        assertionIfDebugMode("\(error).This is probably a programming error.")
     }
 }
 
 extension SQLiteBuffer {
-    // for debug
     func clear() {
         let query = "DELETE FROM Events"
         let context = prepare(query: query)

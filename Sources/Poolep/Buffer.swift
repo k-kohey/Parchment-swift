@@ -40,13 +40,8 @@ public struct BufferRecord: Loggable, LoggerSendable, Equatable {
 }
 
 extension BufferRecord {
-    private struct Event: Loggable {
-        public let eventName: String
-        public let parameters: [String: Any]
-    }
-    
     public var event: Loggable {
-        Event(eventName: eventName, parameters: parameters)
+        TrackingEvent(eventName: eventName, parameters: parameters)
     }
 }
 
