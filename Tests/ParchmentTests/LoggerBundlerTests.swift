@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Poolep
+@testable import Parchment
 
 private extension LoggerComponentID {
     static let a = LoggerComponentID("A")

@@ -1,6 +1,6 @@
 import XCTest
 import class Foundation.Bundle
-@testable import Poolep
+@testable import Parchment
 
 final class SQLiteBufferTests: XCTestCase {
     private var buffer: SQLiteBuffer!

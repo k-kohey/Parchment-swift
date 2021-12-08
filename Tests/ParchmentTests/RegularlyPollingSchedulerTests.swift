@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Poolep
+@testable import Parchment
 
 class RegularlyPollingSchedulerTests: XCTestCase {
     func testSchedule() throws {
