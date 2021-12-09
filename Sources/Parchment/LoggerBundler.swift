@@ -20,6 +20,7 @@ public final class LoggerBundler {
     private let flushStorategy: BufferdEventFlushScheduler
     
     public var configMap: [LoggerComponentID: Configuration] = [:]
+    public var mutations: [Mutation] = []
     
     public init(
         components: [LoggerComponent],
@@ -55,7 +56,7 @@ public final class LoggerBundler {
     private func dispatch(_ records: [BufferRecord], for logger: LoggerComponent, with option: LoggingOption = .init()) async {
         switch option.policy {
         case .immediately:
-            await _send(records, with: logger)
+            await upload(records, with: logger)
         case .bufferingFirst:
             guard configMap[logger.id]?.allowBuffering != .some(false) else {
                 console()?.log("""
@@ -68,8 +69,9 @@ public final class LoggerBundler {
         }
     }
     
-    private func _send(_ records: [BufferRecord], with logger: LoggerComponent) async {
-        let isSucceeded = await logger.send(records)
+    private func upload(_ records: [BufferRecord], with logger: LoggerComponent) async {
+        let events = mutations.transform(records, id: logger.id)
+        let isSucceeded = await logger.send(events)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
         if shouldBuffering {
             await buffer.enqueue(records)
@@ -103,7 +105,7 @@ public final class LoggerBundler {
         }
         
         for (destination, records) in recordEachLogger {
-            await _send(records, with: self.components[.init(destination)])
+            await upload(records, with: self.components[.init(destination)])
         }
     }
 }
