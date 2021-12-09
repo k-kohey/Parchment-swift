@@ -36,6 +36,7 @@ CSV.foreach("event_list.csv", headers: true) do |row|
             let dic = try JSONSerialization.jsonObject(with: try parameters.jsonData(), options: [])
             return .init(eventName: \"#{event_name}\", parameters: dic as? [String: Any] ?? [:]) 
         } catch {
+            assertionFailure()
             return .init(eventName: \"LoggerError\", parameters: [\"error\": error.localizedDescription]) 
         }
     }

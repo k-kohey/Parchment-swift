@@ -46,7 +46,7 @@ public final class LoggerBundler {
         for logger in loggers {
             let record = BufferRecord(
                 destination: logger.id.value,
-                event: event,
+                event: mutations.transform(event, id: logger.id),
                 timestamp: DateProvider.current()
             )
             await dispatch([record], for: logger, with: option)
@@ -70,8 +70,7 @@ public final class LoggerBundler {
     }
     
     private func upload(_ records: [BufferRecord], with logger: LoggerComponent) async {
-        let events = mutations.transform(records, id: logger.id)
-        let isSucceeded = await logger.send(events)
+        let isSucceeded = await logger.send(records)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
         if shouldBuffering {
             await buffer.enqueue(records)

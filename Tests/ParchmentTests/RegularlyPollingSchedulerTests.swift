@@ -24,6 +24,6 @@ class RegularlyPollingSchedulerTests: XCTestCase {
         
         wait(for: [exp], timeout: 1.1)
         XCTAssertEqual(event.eventName, result.first?.eventName)
-        XCTAssertTrue(NSDictionary(dictionary: event.parameters).isEqual(to: result.first?.parameters))
+        XCTAssertTrue(NSDictionary(dictionary: event.parameters).isEqual(to: result.first?.parameters ?? [:]))
     }
 }

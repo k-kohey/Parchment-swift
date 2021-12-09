@@ -22,12 +22,15 @@ public struct TrackingEvent: Loggable {
     }
 }
 
+/// Experimental API
 extension Dictionary: Loggable where Key == PartialKeyPath<Loggable> {
     public var eventName: String {
         self[\.eventName] as? String ?? ""
     }
     
     public var parameters: [String : Any] {
-        self[\.parameters] as? [String : Any] ?? [:]
+        get {
+            self[\.parameters] as? [String : Any] ?? [:]
+        }
     }
 }
