@@ -23,7 +23,10 @@ public struct TrackingEvent: Loggable {
 }
 
 /// Experimental API
-extension Dictionary: Loggable where Key == PartialKeyPath<Loggable> {
+
+typealias LoggableDictonary = Dictionary<PartialKeyPath<Loggable>, Any>
+
+extension LoggableDictonary: Loggable {
     public var eventName: String {
         self[\.eventName] as? String ?? ""
     }

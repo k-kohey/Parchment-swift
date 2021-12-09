@@ -31,11 +31,11 @@ public struct DeviceDataMutation: Mutation {
     ]
     
     public func transform(_ event: Loggable, id: LoggerComponentID) -> Loggable {
-        let new: [PartialKeyPath<Loggable>: Any] = [
+        let log: LoggableDictonary = [
             \.eventName: event.eventName,
             \.parameters: event.parameters.merging(deviceParams) { left, _ in left }
         ]
-        return new
+        return log
     }
 }
 
