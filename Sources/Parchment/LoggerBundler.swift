@@ -26,6 +26,8 @@ public final class LoggerBundler {
         buffer: TrackingEventBuffer = try! SQLiteBuffer(),
         loggingStorategy: BufferdEventFlushScheduler = RegularlyPollingScheduler.default
     ) {
+        assert(!components.isEmpty, "Should set the any logger with initializer")
+        
         self.components = components
         self.buffer = .init(buffer)
         self.flushStorategy = loggingStorategy
@@ -46,23 +48,14 @@ public final class LoggerBundler {
                 event: event,
                 timestamp: DateProvider.current()
             )
-            await send([record], using: logger, with: option)
+            await dispatch([record], for: logger, with: option)
         }
     }
     
-    private func send(_ records: [BufferRecord], using logger: LoggerComponent, with option: LoggingOption = .init()) async {
+    private func dispatch(_ records: [BufferRecord], for logger: LoggerComponent, with option: LoggingOption = .init()) async {
         switch option.policy {
         case .immediately:
-            let isSucceeded = await logger.send(records)
-            let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
-            if shouldBuffering {
-                await buffer.enqueue(records)
-            } else if !isSucceeded {
-                console()?.log("""
-                ⚠ The logger(id=\(logger.id.value)) failed to log an event.
-                However, buffering is skiped because it is not allowed in the configuration.
-                """)
-            }
+            await _send(records, with: logger)
         case .bufferingFirst:
             guard configMap[logger.id]?.allowBuffering != .some(false) else {
                 console()?.log("""
@@ -75,6 +68,19 @@ public final class LoggerBundler {
         }
     }
     
+    private func _send(_ records: [BufferRecord], with logger: LoggerComponent) async {
+        let isSucceeded = await logger.send(records)
+        let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
+        if shouldBuffering {
+            await buffer.enqueue(records)
+        } else if !isSucceeded {
+            console()?.log("""
+            ⚠ The logger(id=\(logger.id.value)) failed to log an event.
+            However, buffering is skiped because it is not allowed in the configuration.
+            """)
+        }
+    }
+    
     public func startLogging() {
         Task.detached { [weak self] in
             guard let self = self else {
@@ -83,20 +89,21 @@ public final class LoggerBundler {
             }
             do {
                 for try await records in self.flushStorategy.schedule(with: self.buffer) {
-                    let recordEachLogger = Dictionary(grouping: records) { record in
-                        record.destination
-                    }
-                    
-                    for (destination, records) in recordEachLogger {
-                        await self.send(
-                            records,
-                            using: self.components[.init(destination)]
-                        )
-                    }
+                    await self.bloadcast(records)
                 }
             } catch {
-                console()?.log("error: \(error.localizedDescription)")
+                console()?.log("\(error.localizedDescription)")
             }
+        }
+    }
+    
+    private func bloadcast(_ records: [BufferRecord]) async {
+        let recordEachLogger = Dictionary(grouping: records) { record in
+            record.destination
+        }
+        
+        for (destination, records) in recordEachLogger {
+            await _send(records, with: self.components[.init(destination)])
         }
     }
 }
