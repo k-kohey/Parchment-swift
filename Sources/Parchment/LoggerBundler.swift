@@ -59,10 +59,10 @@ public final class LoggerBundler {
             await upload(records, with: logger)
         case .bufferingFirst:
             guard configMap[logger.id]?.allowBuffering != .some(false) else {
-                console()?.log("""
-                ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
-                BufferingFirst policy has been selected in options, but the logger does not allow buffering.
-                """)
+//                console()?.log("""
+//                ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
+//                BufferingFirst policy has been selected in options, but the logger does not allow buffering.
+//                """)
                 return
             }
             await buffer.enqueue(records)
@@ -75,10 +75,10 @@ public final class LoggerBundler {
         if shouldBuffering {
             await buffer.enqueue(records)
         } else if !isSucceeded {
-            console()?.log("""
-            ⚠ The logger(id=\(logger.id.value)) failed to log an event.
-            However, buffering is skiped because it is not allowed in the configuration.
-            """)
+//            console()?.log("""
+//            ⚠ The logger(id=\(logger.id.value)) failed to log an event.
+//            However, buffering is skiped because it is not allowed in the configuration.
+//            """)
         }
     }
     
@@ -93,7 +93,7 @@ public final class LoggerBundler {
                     await self.bloadcast(records)
                 }
             } catch {
-                console()?.log("\(error.localizedDescription)")
+//                console()?.log("\(error.localizedDescription)")
             }
         }
     }

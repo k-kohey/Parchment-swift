@@ -24,7 +24,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             create: false
         ).appendingPathComponent("Events.db")
         
-        console()?.log("Events.db is created on \(dbFilePath.absoluteString)")
+//        console()?.log("Events.db is created on \(dbFilePath.absoluteString)")
         
         if sqlite3_open(dbFilePath.path, &dbPointer) != SQLITE_OK {
             throw SQLiteBufferError.dbfileCanNotBeenOpend

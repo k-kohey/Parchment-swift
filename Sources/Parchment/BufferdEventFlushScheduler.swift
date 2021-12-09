@@ -44,7 +44,7 @@ public final class RegularlyPollingScheduler: BufferdEventFlushScheduler {
         let flush = {
             let records = await buffer.dequeue()
             
-            console()?.log("✨ Flush \(records.count) event")
+//            console()?.log("✨ Flush \(records.count) event")
             didFlush(records)
         }
         
