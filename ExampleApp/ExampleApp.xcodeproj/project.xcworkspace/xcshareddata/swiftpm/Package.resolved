@@ -2,11 +2,11 @@
   "object": {
     "pins": [
       {
-        "package": "Poolep",
+        "package": "Parchment",
         "repositoryURL": "https://github.com/k-kohey/LoggerSample",
         "state": {
           "branch": "main",
-          "revision": "61dc45445b9a0934eaa346936012a2da54e862bb",
+          "revision": "d67892fc17a7b88c17fae7a9728c300f2a159663",
           "version": null
         }
       }

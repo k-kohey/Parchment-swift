@@ -13,7 +13,7 @@
 		B802C0BF2747FDA80037BB83 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B802C0AD2747FDA60037BB83 /* ContentView.swift */; };
 		B802C0C02747FDA80037BB83 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B802C0AE2747FDA80037BB83 /* Assets.xcassets */; };
 		B802C0C12747FDA80037BB83 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B802C0AE2747FDA80037BB83 /* Assets.xcassets */; };
-		B802C0CC2747FE690037BB83 /* Poolep in Frameworks */ = {isa = PBXBuildFile; productRef = B802C0CB2747FE690037BB83 /* Poolep */; };
+		B8B65D5027620B020008F609 /* Parchment in Frameworks */ = {isa = PBXBuildFile; productRef = B8B65D4F27620B020008F609 /* Parchment */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,7 +30,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B802C0CC2747FE690037BB83 /* Poolep in Frameworks */,
+				B8B65D5027620B020008F609 /* Parchment in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,7 +97,7 @@
 			);
 			name = "ExampleApp (iOS)";
 			packageProductDependencies = (
-				B802C0CB2747FE690037BB83 /* Poolep */,
+				B8B65D4F27620B020008F609 /* Parchment */,
 			);
 			productName = "ExampleApp (iOS)";
 			productReference = B802C0B32747FDA80037BB83 /* ExampleApp.app */;
@@ -148,7 +148,7 @@
 			);
 			mainGroup = B802C0A62747FDA60037BB83;
 			packageReferences = (
-				B802C0CA2747FE690037BB83 /* XCRemoteSwiftPackageReference "LoggerSample" */,
+				B8B65D4E27620B020008F609 /* XCRemoteSwiftPackageReference "LoggerSample" */,
 			);
 			productRefGroup = B802C0B42747FDA80037BB83 /* Products */;
 			projectDirPath = "";
@@ -456,7 +456,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		B802C0CA2747FE690037BB83 /* XCRemoteSwiftPackageReference "LoggerSample" */ = {
+		B8B65D4E27620B020008F609 /* XCRemoteSwiftPackageReference "LoggerSample" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/k-kohey/LoggerSample";
 			requirement = {
@@ -467,10 +467,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B802C0CB2747FE690037BB83 /* Poolep */ = {
+		B8B65D4F27620B020008F609 /* Parchment */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = B802C0CA2747FE690037BB83 /* XCRemoteSwiftPackageReference "LoggerSample" */;
-			productName = Poolep;
+			package = B8B65D4E27620B020008F609 /* XCRemoteSwiftPackageReference "LoggerSample" */;
+			productName = Parchment;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

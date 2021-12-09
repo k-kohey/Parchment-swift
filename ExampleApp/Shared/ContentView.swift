@@ -1,21 +1,24 @@
-//
-//  ContentView.swift
-//  Shared
-//
-//  Created by k-kohey on 2021/11/20.
-//
+import Parchment
 
-import SwiftUI
+extension LoggerComponentID {
+    static let my: Self = .init("My")
+}
 
-struct ContentView: View {
-    var body: some View {
-        Text("Hello, world!")
-            .padding()
+struct MyLogger: LoggerComponent {
+    static var id: LoggerComponentID = .my
+    
+    func send(_ log: [LoggerSendable]) async -> Bool {
+        print("send \(log)")
+        return true
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+extension TrackingEvent {
+    static func impletion(_ screen: String) -> Self {
+        TrackingEvent(eventName: "impletion", parameters: ["screen": screen])
     }
 }
+
+let logger = LoggerBundler(
+    components: [MyLogger()]
+)
