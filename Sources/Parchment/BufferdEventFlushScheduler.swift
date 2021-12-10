@@ -30,10 +30,12 @@ public final class RegularlyPollingScheduler: BufferdEventFlushScheduler {
     }
     
     public func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->()) {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            Task {
-                await self.tick(with: buffer, didFlush: didFlush)
+        DispatchQueue.main.async { [weak self] in
+            self?.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                guard let self = self else { return }
+                Task {
+                    await self.tick(with: buffer, didFlush: didFlush)
+                }
             }
         }
     }

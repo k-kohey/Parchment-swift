@@ -53,7 +53,11 @@ public final class LoggerBundler {
         }
     }
     
-    private func dispatch(_ records: [BufferRecord], for logger: LoggerComponent, with option: LoggingOption = .init()) async {
+    private func dispatch(
+        _ records: [BufferRecord],
+        for logger: LoggerComponent,
+        with option: LoggingOption
+    ) async {
         switch option.policy {
         case .immediately:
             await upload(records, with: logger)
@@ -83,13 +87,13 @@ public final class LoggerBundler {
     }
     
     public func startLogging() {
-        Task.detached { [weak self] in
+        Task { [weak self] in
             guard let self = self else {
                 assertionIfDebugMode("LoggerBundler instance should been retained by any object due to log events definitely")
                 return
             }
             do {
-                for try await records in self.flushStorategy.schedule(with: self.buffer) {
+                for try await records in await self.flushStorategy.schedule(with: self.buffer) {
                     await self.bloadcast(records)
                 }
             } catch {

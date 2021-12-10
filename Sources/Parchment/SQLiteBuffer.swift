@@ -200,6 +200,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
     }
     
     private func delete(_ IDs: [String]) -> Bool {
+        guard IDs.count > 0 else { return true }
         let query = """
         DELETE FROM Events WHERE \(IDs.map { _ in "id = ?" }.joined(separator:  " OR "))
         """
