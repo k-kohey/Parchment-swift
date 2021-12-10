@@ -93,7 +93,7 @@ public final class LoggerBundler {
                 return
             }
             do {
-                for try await records in await self.flushStorategy.schedule(with: self.buffer) {
+                for try await records in self.flushStorategy.schedule(with: self.buffer) {
                     await self.bloadcast(records)
                 }
             } catch {
