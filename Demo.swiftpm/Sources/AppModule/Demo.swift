@@ -36,7 +36,7 @@ struct ExampleAppApp: App {
         WindowGroup {
             Button("send event") {
                 Task {
-                    await logger.send(.tap)
+                    await logger.send(.tap, with: .init(policy: .bufferingFirst))
                 }
             }
             .onAppear {
