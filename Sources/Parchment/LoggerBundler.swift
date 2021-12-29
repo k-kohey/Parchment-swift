@@ -69,7 +69,7 @@ public final class LoggerBundler {
 //                """)
                 return
             }
-            await buffer.enqueue(records)
+            await buffer.save(records)
         }
     }
     
@@ -77,7 +77,7 @@ public final class LoggerBundler {
         let isSucceeded = await logger.send(records)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
         if shouldBuffering {
-            await buffer.enqueue(records)
+            await buffer.save(records)
         } else if !isSucceeded {
 //            console()?.log("""
 //            ⚠ The logger(id=\(logger.id.value)) failed to log an event.

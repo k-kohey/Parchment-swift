@@ -36,11 +36,11 @@ final class LoggerB: LoggerComponent {
 final class EventQueueMock: TrackingEventBuffer {
     private var records: [BufferRecord] = []
     
-    func enqueue(_ e: [BufferRecord]) {
+    func save(_ e: [BufferRecord]) {
         records += e
     }
     
-    func dequeue(limit: Int64) -> [BufferRecord] {
+    func load(limit: Int64) -> [BufferRecord] {
         let count = 0 < limit ? Int(limit) : records.count
         return (0..<min(count, records.count)).reduce([]) { result, _ in
             result + [dequeue()].compactMap { $0 }
@@ -71,7 +71,7 @@ final class BufferdEventFlushStorategyMock: BufferdEventFlushScheduler {
     }
     
     func flush() async {
-        await didFlush!(buffer!.dequeue(limit: .max))
+        await didFlush!(buffer!.load(limit: .max))
         
     }
 }

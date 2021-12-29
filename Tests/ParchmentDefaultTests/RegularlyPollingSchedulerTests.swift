@@ -13,11 +13,11 @@ import Foundation
 final class EventQueueMock: TrackingEventBuffer {
     private var records: [BufferRecord] = []
     
-    func enqueue(_ e: [BufferRecord]) {
+    func save(_ e: [BufferRecord]) {
         records += e
     }
     
-    func dequeue(limit: Int64) -> [BufferRecord] {
+    func load(limit: Int64) -> [BufferRecord] {
         let count = 0 < limit ? Int(limit) : records.count
         return (0..<min(count, records.count)).reduce([]) { result, _ in
             result + [dequeue()].compactMap { $0 }
@@ -50,7 +50,7 @@ class RegularlyPollingSchedulerTests: XCTestCase {
             result = record
             exp.fulfill()
         }
-        buffer.enqueue([.init(destination: "hoge", event: event, timestamp: Date())])
+        buffer.save([.init(destination: "hoge", event: event, timestamp: Date())])
         
         wait(for: [exp], timeout: 1.1)
         XCTAssertEqual(event.eventName, result.first?.eventName)

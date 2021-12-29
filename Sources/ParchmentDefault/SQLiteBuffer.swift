@@ -50,7 +50,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         }
     }
     
-    public func enqueue(_ e: [BufferRecord]) {
+    public func save(_ e: [BufferRecord]) {
         let query = """
         INSERT INTO Events (
             id,
@@ -114,7 +114,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         }
     }
     
-    public func dequeue(limit: Int64) -> [BufferRecord] {
+    public func load(limit: Int64) -> [BufferRecord] {
         let query: String
         if limit < 0 {
             query = "SELECT * FROM Events ORDER BY timestamp"
