@@ -30,13 +30,14 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(name: "Parchment", path: "../")
+        .package(name: "Parchment", path: "../"),
     ],
     targets: [
         .executableTarget(
             name: "AppModule",
             dependencies: [
-                .productItem(name: "Parchment", package: "Parchment", condition: nil)
+                .productItem(name: "Parchment", package: "Parchment", condition: nil),
+                .productItem(name: "ParchmentDefault", package: "Parchment", condition: nil),
             ]
         )
     ]
