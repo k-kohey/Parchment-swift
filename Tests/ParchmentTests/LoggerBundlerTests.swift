@@ -80,7 +80,7 @@ class LoggerBundlerTests: XCTestCase {
     func testSendImmediately() async throws {
         let logger = LoggerA()
         let buffer = EventQueueMock()
-        let bundler = LoggerBundler(components: [logger], buffer: buffer)
+        let bundler = LoggerBundler(components: [logger], buffer: buffer, loggingStorategy: BufferdEventFlushStorategyMock())
         
         var didSend = false
         logger._send = {
@@ -129,7 +129,8 @@ class LoggerBundlerTests: XCTestCase {
         let buffer = EventQueueMock()
         let bundler = LoggerBundler(
             components: [loggerA, loggerB],
-            buffer: buffer
+            buffer: buffer,
+            loggingStorategy: BufferdEventFlushStorategyMock()
         )
         
         var didSendFromLoggerA = false

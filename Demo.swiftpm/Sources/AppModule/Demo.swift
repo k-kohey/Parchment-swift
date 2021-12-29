@@ -1,5 +1,6 @@
 import SwiftUI
 import Parchment
+import ParchmentDefault
 
 extension LoggerComponentID {
     static let my: Self = .init("My")
@@ -24,7 +25,7 @@ extension TrackingEvent {
     }
 }
 
-let logger = LoggerBundler(
+let logger = LoggerBundler.make(
     components: [MyLogger()]
 )
 

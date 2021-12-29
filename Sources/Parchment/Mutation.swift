@@ -18,25 +18,3 @@ extension Sequence where Element == Mutation {
         }
     }
 }
-
-#if canImport(UIKit)
-
-import UIKit
-
-public struct DeviceDataMutation: Mutation {
-    private let deviceParams = [
-        "Model": UIDevice.current.name,
-        "OS": UIDevice.current.systemName,
-        "OS Version": UIDevice.current.systemVersion
-    ]
-    
-    public func transform(_ event: Loggable, id: LoggerComponentID) -> Loggable {
-        let log: LoggableDictonary = [
-            \.eventName: event.eventName,
-            \.parameters: event.parameters.merging(deviceParams) { left, _ in left }
-        ]
-        return log
-    }
-}
-
-#endif

@@ -24,8 +24,8 @@ public final class LoggerBundler {
     
     public init(
         components: [LoggerComponent],
-        buffer: TrackingEventBuffer = try! SQLiteBuffer(),
-        loggingStorategy: BufferdEventFlushScheduler = RegularlyPollingScheduler.default
+        buffer: TrackingEventBuffer,
+        loggingStorategy: BufferdEventFlushScheduler
     ) {
         assert(!components.isEmpty, "Should set the any logger with initializer")
         

@@ -1,5 +1,6 @@
 import XCTest
 import class Foundation.Bundle
+@testable import ParchmentDefault
 @testable import Parchment
 
 final class SQLiteBufferTests: XCTestCase {

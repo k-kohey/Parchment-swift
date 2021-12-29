@@ -14,7 +14,7 @@ public struct BufferRecord: Loggable, LoggerSendable, Equatable {
     public let parameters: [String: Any]
     public let timestamp: Date
     
-    init(id: String = UUID().uuidString, destination: String, event: Loggable, timestamp: Date) {
+    public init(id: String = UUID().uuidString, destination: String, event: Loggable, timestamp: Date) {
         self.id = id
         self.destination = destination
         self.eventName = event.eventName
@@ -22,7 +22,7 @@ public struct BufferRecord: Loggable, LoggerSendable, Equatable {
         self.timestamp = timestamp
     }
     
-    internal init(id: String = UUID().uuidString, destination: String, eventName: String, parameters: [String : Any], timestamp: Date) {
+    public init(id: String = UUID().uuidString, destination: String, eventName: String, parameters: [String : Any], timestamp: Date) {
         self.id = id
         self.destination = destination
         self.eventName = eventName
@@ -64,15 +64,15 @@ final public actor TrackingEventBufferAdapter {
         self.buffer = buffer
     }
     
-    func enqueue(_ e: [BufferRecord]) {
+    public func enqueue(_ e: [BufferRecord]) {
         buffer.enqueue(e)
     }
     
-    func dequeue(limit: Int64 = -1) -> [BufferRecord] {
+    public func dequeue(limit: Int64 = -1) -> [BufferRecord] {
         buffer.dequeue(limit: limit)
     }
     
-    func count() -> Int {
+    public func count() -> Int {
         buffer.count()
     }
 }

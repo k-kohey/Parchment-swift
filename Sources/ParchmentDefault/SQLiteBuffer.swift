@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Parchment
 import SQLite3
 
 public final class SQLiteBuffer: TrackingEventBuffer {
@@ -249,4 +250,8 @@ extension String {
     var utf8String: UnsafePointer<CChar>? {
         (self as NSString).utf8String
     }
+}
+
+func assertionIfDebugMode(_ msg: String) {
+    assert(Configuration.debugMode, msg)
 }

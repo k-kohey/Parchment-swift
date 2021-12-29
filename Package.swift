@@ -11,6 +11,9 @@ let package = Package(
         .library(
             name: "Parchment",
             targets: ["Parchment"]),
+        .library(
+            name: "ParchmentDefault",
+            targets: ["ParchmentDefault"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -22,8 +25,15 @@ let package = Package(
         .target(
             name: "Parchment",
             dependencies: []),
+        .target(
+            name: "ParchmentDefault",
+            dependencies: [.target(name: "Parchment")]
+        ),
         .testTarget(
             name: "ParchmentTests",
             dependencies: ["Parchment"]),
+        .testTarget(
+            name: "ParchmentDefaultTests",
+            dependencies: ["ParchmentDefault"]),
     ]
 )

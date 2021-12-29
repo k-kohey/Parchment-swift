@@ -6,7 +6,37 @@
 //
 
 import XCTest
+import Foundation
+@testable import ParchmentDefault
 @testable import Parchment
+
+final class EventQueueMock: TrackingEventBuffer {
+    private var records: [BufferRecord] = []
+    
+    func enqueue(_ e: [BufferRecord]) {
+        records += e
+    }
+    
+    func dequeue(limit: Int64) -> [BufferRecord] {
+        let count = 0 < limit ? Int(limit) : records.count
+        return (0..<min(count, records.count)).reduce([]) { result, _ in
+            result + [dequeue()].compactMap { $0 }
+        }
+    }
+    
+    func count() -> Int {
+        records.count
+    }
+    
+    private func dequeue() -> BufferRecord? {
+        defer {
+            if !records.isEmpty {
+                records.removeFirst()
+            }
+        }
+        return records.first
+    }
+}
 
 class RegularlyPollingSchedulerTests: XCTestCase {
     func testSchedule() throws {
