@@ -17,7 +17,7 @@ struct DateProvider {
 public final class LoggerBundler {
     private let components: [LoggerComponent]
     private let buffer: TrackingEventBufferAdapter
-    private let flushStorategy: BufferdEventFlushScheduler
+    private let flushStrategy: BufferedEventFlushScheduler
     
     public var configMap: [LoggerComponentID: Configuration] = [:]
     public var mutations: [Mutation] = []
@@ -25,13 +25,13 @@ public final class LoggerBundler {
     public init(
         components: [LoggerComponent],
         buffer: TrackingEventBuffer,
-        loggingStorategy: BufferdEventFlushScheduler
+        loggingStrategy: BufferedEventFlushScheduler
     ) {
         assert(!components.isEmpty, "Should set the any logger with initializer")
         
         self.components = components
         self.buffer = .init(buffer)
-        self.flushStorategy = loggingStorategy
+        self.flushStrategy = loggingStrategy
     }
     
     public func send(_ event: Loggable, with option: LoggingOption = .init()) async {
@@ -93,7 +93,7 @@ public final class LoggerBundler {
                 return
             }
             do {
-                for try await records in self.flushStorategy.schedule(with: self.buffer) {
+                for try await records in self.flushStrategy.schedule(with: self.buffer) {
                     await self.bloadcast(records)
                 }
             } catch {

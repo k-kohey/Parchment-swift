@@ -13,8 +13,8 @@ public extension LoggerBundler {
     static func make(
         components: [LoggerComponent],
         buffer: TrackingEventBuffer = try! SQLiteBuffer(),
-        loggingStorategy: BufferdEventFlushScheduler = RegularlyPollingScheduler.default
+        loggingStrategy: BufferedEventFlushScheduler = RegularlyPollingScheduler.default
     ) -> LoggerBundler {
-        Self(components: components, buffer: buffer, loggingStorategy: loggingStorategy)
+        Self(components: components, buffer: buffer, loggingStrategy: loggingStrategy)
     }
 }

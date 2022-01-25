@@ -61,7 +61,7 @@ final class EventQueueMock: TrackingEventBuffer {
     }
 }
 
-final class BufferdEventFlushStorategyMock: BufferdEventFlushScheduler {
+final class BufferedEventFlushStrategyMock: BufferedEventFlushScheduler {
     private var didFlush: (([BufferRecord]) -> ())? = nil
     private var buffer: TrackingEventBufferAdapter?
     
@@ -80,7 +80,7 @@ class LoggerBundlerTests: XCTestCase {
     func testSendImmediately() async throws {
         let logger = LoggerA()
         let buffer = EventQueueMock()
-        let bundler = LoggerBundler(components: [logger], buffer: buffer, loggingStorategy: BufferdEventFlushStorategyMock())
+        let bundler = LoggerBundler(components: [logger], buffer: buffer, loggingStrategy: BufferedEventFlushStrategyMock())
         
         var didSend = false
         logger._send = {
@@ -99,11 +99,11 @@ class LoggerBundlerTests: XCTestCase {
     func testSendAfterBuffering() async throws {
         let logger = LoggerA()
         let buffer = EventQueueMock()
-        let storategy = BufferdEventFlushStorategyMock()
+        let strategy = BufferedEventFlushStrategyMock()
         let bundler = LoggerBundler(
             components: [logger],
             buffer: buffer,
-            loggingStorategy: storategy
+            loggingStrategy: strategy
         )
         
         bundler.startLogging()
@@ -118,7 +118,7 @@ class LoggerBundlerTests: XCTestCase {
         )
         XCTAssertEqual(buffer.count(), 2)
         
-        await storategy.flush()
+        await strategy.flush()
         
         XCTAssertEqual(buffer.count(), 0)
     }
@@ -130,7 +130,7 @@ class LoggerBundlerTests: XCTestCase {
         let bundler = LoggerBundler(
             components: [loggerA, loggerB],
             buffer: buffer,
-            loggingStorategy: BufferdEventFlushStorategyMock()
+            loggingStrategy: BufferedEventFlushStrategyMock()
         )
         
         var didSendFromLoggerA = false

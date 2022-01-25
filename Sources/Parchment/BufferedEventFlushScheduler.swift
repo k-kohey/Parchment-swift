@@ -6,11 +6,11 @@
 //
 import Foundation
 
-public protocol BufferdEventFlushScheduler {
+public protocol BufferedEventFlushScheduler {
     func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->())
 }
 
-extension BufferdEventFlushScheduler {
+extension BufferedEventFlushScheduler {
     func schedule(with buffer: TrackingEventBufferAdapter) -> AsyncThrowingStream<[BufferRecord], Error> {
         AsyncThrowingStream { continuation in
             schedule(with: buffer) {

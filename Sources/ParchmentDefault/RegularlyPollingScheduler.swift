@@ -8,7 +8,7 @@
 import Parchment
 import Foundation
 
-public final class RegularlyPollingScheduler: BufferdEventFlushScheduler {
+public final class RegularlyPollingScheduler: BufferedEventFlushScheduler {
     public static let `default` = RegularlyPollingScheduler(timeInterval: 60)
     
     let timeInterval: TimeInterval
