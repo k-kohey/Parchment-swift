@@ -15,7 +15,7 @@ struct DateProvider {
 }
 
 public final class LoggerBundler {
-    private let components: [LoggerComponent]
+    private var components: [LoggerComponent]
     private let buffer: TrackingEventBufferAdapter
     private let flushStrategy: BufferedEventFlushScheduler
     
@@ -27,14 +27,17 @@ public final class LoggerBundler {
         buffer: TrackingEventBuffer,
         loggingStrategy: BufferedEventFlushScheduler
     ) {
-        assert(!components.isEmpty, "Should set the any logger with initializer")
-        
         self.components = components
         self.buffer = .init(buffer)
         self.flushStrategy = loggingStrategy
     }
     
+    public func add(component: LoggerComponent) {
+        components.append(component)
+    }
+    
     public func send(_ event: Loggable, with option: LoggingOption = .init()) async {
+        assert(!components.isEmpty, "Should set the any logger")
         let loggers: [LoggerComponent] = {
             if let scope = option.scope {
                 return components[scope]
