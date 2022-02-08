@@ -62,17 +62,23 @@ final class EventQueueMock: TrackingEventBuffer {
 }
 
 final class BufferedEventFlushStrategyMock: BufferedEventFlushScheduler {
-    private var didFlush: (([BufferRecord]) -> ())? = nil
     private var buffer: TrackingEventBufferAdapter?
     
-    func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord]) -> ()) {
-        self.didFlush = didFlush
+    private var continuation: AsyncThrowingStream<[BufferRecord], Error>.Continuation?
+    
+    func schedule(with buffer: TrackingEventBufferAdapter) async -> AsyncThrowingStream<[BufferRecord], Error> {
         self.buffer = buffer
+        return .init { continuation in
+            self.continuation = continuation
+        }
+    }
+    
+    func cancel() {
+        
     }
     
     func flush() async {
-        await didFlush!(buffer!.load(limit: .max))
-        
+        await continuation?.yield(buffer!.load(limit: .max))
     }
 }
 

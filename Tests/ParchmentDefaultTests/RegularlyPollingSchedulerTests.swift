@@ -43,17 +43,13 @@ class RegularlyPollingSchedulerTests: XCTestCase {
         let scheduler = RegularlyPollingScheduler(timeInterval: 0.1)
         let buffer = EventQueueMock()
         let event = TrackingEvent(eventName: "hoge", parameters: [:])
-        let exp = expectation(description: "wait")
         
-        var result: [BufferRecord] = []
-        scheduler.schedule(with: .init(buffer)) { record in
-            result = record
-            exp.fulfill()
+        Task {
+            for try await result in await scheduler.schedule(with: .init(buffer)) {
+                XCTAssertEqual(event.eventName, result.first?.eventName)
+                XCTAssertTrue(NSDictionary(dictionary: event.parameters).isEqual(to: result.first?.parameters ?? [:]))
+            }
         }
         buffer.save([.init(destination: "hoge", event: event, timestamp: Date())])
-        
-        wait(for: [exp], timeout: 1.1)
-        XCTAssertEqual(event.eventName, result.first?.eventName)
-        XCTAssertTrue(NSDictionary(dictionary: event.parameters).isEqual(to: result.first?.parameters ?? [:]))
     }
 }

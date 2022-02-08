@@ -16,7 +16,7 @@ public final class RegularlyPollingScheduler: BufferedEventFlushScheduler {
     
     var lastFlushedDate: Date = Date()
     
-    private var timer: Timer?
+    private weak var timer: Timer?
     
     public init(
         timeInterval: TimeInterval,
@@ -27,15 +27,22 @@ public final class RegularlyPollingScheduler: BufferedEventFlushScheduler {
         self.limitOnNumberOfEvent = limitOnNumberOfEvent
     }
     
-    public func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->()) {
-        DispatchQueue.main.async { [weak self] in
-            self?.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                guard let self = self else { return }
-                Task {
-                    await self.tick(with: buffer, didFlush: didFlush)
+    public func schedule(with buffer: TrackingEventBufferAdapter) async -> AsyncThrowingStream<[BufferRecord], Error> {
+        return AsyncThrowingStream { continuation in
+            let timer = Timer(fire: .init(), interval: 1, repeats: true) { _ in
+                Task { [weak self] in
+                    await self?.tick(with: buffer) {
+                        continuation.yield($0)
+                    }
                 }
             }
+            RunLoop.main.add(timer, forMode: .common)
+            self.timer = timer
         }
+    }
+    
+    public func cancel() {
+        timer?.invalidate()
     }
     
     private func tick(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->()) async {

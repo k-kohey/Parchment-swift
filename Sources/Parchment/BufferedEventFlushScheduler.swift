@@ -7,15 +7,6 @@
 import Foundation
 
 public protocol BufferedEventFlushScheduler {
-    func schedule(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->())
-}
-
-extension BufferedEventFlushScheduler {
-    func schedule(with buffer: TrackingEventBufferAdapter) -> AsyncThrowingStream<[BufferRecord], Error> {
-        AsyncThrowingStream { continuation in
-            schedule(with: buffer) {
-                continuation.yield($0)
-            }
-        }
-    }
+    func schedule(with buffer: TrackingEventBufferAdapter) async -> AsyncThrowingStream<[BufferRecord], Error>
+    func cancel()
 }

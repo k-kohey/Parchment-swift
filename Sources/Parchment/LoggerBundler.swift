@@ -22,6 +22,8 @@ public final class LoggerBundler {
     public var configMap: [LoggerComponentID: Configuration] = [:]
     public var mutations: [Mutation] = []
     
+    private var loggingTask: Task<(), Never>?
+    
     public init(
         components: [LoggerComponent],
         buffer: TrackingEventBuffer,
@@ -90,19 +92,23 @@ public final class LoggerBundler {
     }
     
     public func startLogging() {
-        Task { [weak self] in
+        loggingTask = Task { [weak self] in
             guard let self = self else {
                 assertionIfDebugMode("LoggerBundler instance should been retained by any object due to log events definitely")
                 return
             }
             do {
-                for try await records in self.flushStrategy.schedule(with: self.buffer) {
+                for try await records in await self.flushStrategy.schedule(with: self.buffer) {
                     await self.bloadcast(records)
                 }
             } catch {
 //                console()?.log("\(error.localizedDescription)")
             }
         }
+    }
+    
+    func cancell() {
+        loggingTask?.cancel()
     }
     
     private func bloadcast(_ records: [BufferRecord]) async {
