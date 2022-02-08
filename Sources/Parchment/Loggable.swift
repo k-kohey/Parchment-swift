@@ -1,5 +1,5 @@
 // 
-//  File.swift
+//  Loggable.swift
 //  
 //
 //  Created by k-kohey on 2021/10/08.
@@ -19,21 +19,5 @@ public struct TrackingEvent: Loggable {
     public init(eventName: String, parameters: [String : Any]) {
         self.eventName = eventName
         self.parameters = parameters
-    }
-}
-
-/// Experimental API
-
-public typealias LoggableDictonary = Dictionary<PartialKeyPath<Loggable>, Any>
-
-extension LoggableDictonary: Loggable {
-    public var eventName: String {
-        self[\.eventName] as? String ?? ""
-    }
-    
-    public var parameters: [String : Any] {
-        get {
-            self[\.parameters] as? [String : Any] ?? [:]
-        }
     }
 }

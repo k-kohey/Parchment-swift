@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  BufferedEventFlushScheduler.swift
 //
 //
 //  Created by k-kohey on 2021/10/08.

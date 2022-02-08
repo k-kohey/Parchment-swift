@@ -1,13 +1,11 @@
 //
-//  File.swift
+//  LoggerBundler+.swift
 //  
 //
 //  Created by k-kohey on 2021/12/29.
 //
 
 import Parchment
-
-private var defaultInstance: LoggerBundler!
 
 public extension LoggerBundler {
     static func make(

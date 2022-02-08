@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol TrackingEventBuffer {
-    func save(_ e: [BufferRecord])
+    func save(_ event: [BufferRecord])
     func load(limit: Int64) -> [BufferRecord]
     func count() -> Int
 }
@@ -26,8 +26,8 @@ final public actor TrackingEventBufferAdapter {
         self.buffer = buffer
     }
     
-    public func save(_ e: [BufferRecord]) {
-        buffer.save(e)
+    public func save(_ event: [BufferRecord]) {
+        buffer.save(event)
     }
     
     public func load(limit: Int64 = -1) -> [BufferRecord] {
