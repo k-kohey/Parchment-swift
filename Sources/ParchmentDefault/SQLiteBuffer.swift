@@ -22,7 +22,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             for: .documentDirectory,
             in: .userDomainMask,
             appropriateFor: nil,
-            create: false
+            create: true
         ).appendingPathComponent("Events.db")
         
 //        console()?.log("Events.db is created on \(dbFilePath.absoluteString)")
