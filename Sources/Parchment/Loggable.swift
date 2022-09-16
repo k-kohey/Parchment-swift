@@ -1,6 +1,6 @@
-// 
+//
 //  Loggable.swift
-//  
+//
 //
 //  Created by k-kohey on 2021/10/08.
 //
@@ -14,9 +14,9 @@ public protocol Loggable {
 
 public struct TrackingEvent: Loggable {
     public let eventName: String
-    public let parameters: [String : Any]
-    
-    public init(eventName: String, parameters: [String : Any]) {
+    public let parameters: [String: Any]
+
+    public init(eventName: String, parameters: [String: Any]) {
         self.eventName = eventName
         self.parameters = parameters
     }

@@ -1,34 +1,34 @@
 //
 //  RegularlyPollingScheduler.swift
-//  
+//
 //
 //  Created by k-kohey on 2021/12/29.
 //
 
-import Parchment
 import Foundation
+import Parchment
 
 public final class RegularlyPollingScheduler: BufferedEventFlushScheduler {
     public static let `default` = RegularlyPollingScheduler(timeInterval: 60)
-    
+
     let timeInterval: TimeInterval
     let limitOnNumberOfEvent: Int
-    
-    var lastFlushedDate: Date = Date()
-    
+
+    var lastFlushedDate: Date = .init()
+
     private weak var timer: Timer?
-    
+
     public init(
         timeInterval: TimeInterval,
         limitOnNumberOfEvent: Int = .max,
-        dispatchQueue: DispatchQueue? = nil
+        dispatchQueue _: DispatchQueue? = nil
     ) {
         self.timeInterval = timeInterval
         self.limitOnNumberOfEvent = limitOnNumberOfEvent
     }
-    
+
     public func schedule(with buffer: TrackingEventBufferAdapter) async -> AsyncThrowingStream<[BufferRecord], Error> {
-        return AsyncThrowingStream { continuation in
+        AsyncThrowingStream { continuation in
             let timer = Timer(fire: .init(), interval: 1, repeats: true) { _ in
                 Task { [weak self] in
                     await self?.tick(with: buffer) {
@@ -40,31 +40,31 @@ public final class RegularlyPollingScheduler: BufferedEventFlushScheduler {
             self.timer = timer
         }
     }
-    
+
     public func cancel() {
         timer?.invalidate()
     }
-    
-    private func tick(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord])->()) async {
+
+    private func tick(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord]) -> Void) async {
         guard await buffer.count() > 0 else { return }
-        
+
         let flush = {
             let records = await buffer.load()
-            
+
 //            console()?.log("✨ Flush \(records.count) event")
             didFlush(records)
         }
-        
+
         let count = await buffer.count()
-        if self.limitOnNumberOfEvent < count {
+        if limitOnNumberOfEvent < count {
             await flush()
             return
         }
-        
-        let timeSinceLastFlush = abs(self.lastFlushedDate.timeIntervalSinceNow)
-        if self.timeInterval < timeSinceLastFlush {
+
+        let timeSinceLastFlush = abs(lastFlushedDate.timeIntervalSinceNow)
+        if timeInterval < timeSinceLastFlush {
             await flush()
-            self.lastFlushedDate = Date()
+            lastFlushedDate = Date()
             return
         }
     }

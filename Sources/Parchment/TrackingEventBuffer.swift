@@ -1,6 +1,6 @@
 //
 //  TrackingEventBuffer.swift
-//  
+//
 //
 //  Created by k-kohey on 2021/12/29.
 //
@@ -19,21 +19,21 @@ extension TrackingEventBuffer {
     }
 }
 
-final public actor TrackingEventBufferAdapter {
+public final actor TrackingEventBufferAdapter {
     private let buffer: TrackingEventBuffer
-    
+
     init(_ buffer: TrackingEventBuffer) {
         self.buffer = buffer
     }
-    
+
     public func save(_ event: [BufferRecord]) {
         buffer.save(event)
     }
-    
+
     public func load(limit: Int64 = -1) -> [BufferRecord] {
         buffer.load(limit: limit)
     }
-    
+
     public func count() -> Int {
         buffer.count()
     }

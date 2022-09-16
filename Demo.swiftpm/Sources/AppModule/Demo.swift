@@ -8,7 +8,7 @@ extension LoggerComponentID {
 
 struct MyLogger: LoggerComponent {
     static var id: LoggerComponentID = .my
-    
+
     func send(_ log: [LoggerSendable]) async -> Bool {
         print("send \(log)")
         return true
@@ -19,7 +19,7 @@ extension TrackingEvent {
     static func impletion(_ screen: String) -> Self {
         TrackingEvent(eventName: "impletion", parameters: ["screen": screen])
     }
-    
+
     static var tap: Self {
         .init(eventName: "tap", parameters: [:])
     }
@@ -29,7 +29,6 @@ let logger = LoggerBundler.make(
     components: [MyLogger()],
     loggingStrategy: RegularlyPollingScheduler(timeInterval: 5)
 )
-
 
 @main
 struct ExampleAppApp: App {
@@ -49,4 +48,3 @@ struct ExampleAppApp: App {
         }
     }
 }
-
