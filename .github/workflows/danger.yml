@@ -1,0 +1,25 @@
+name: Danger
+
+on: [pull_request]
+
+jobs:
+  danger:
+    name: Danger
+    runs-on: macos-latest
+
+    steps:
+      - name: install danger-swift
+        run: |
+          # Install danger-swift
+          git clone https://github.com/danger/danger-swift.git
+          cd danger-swift
+          make install
+
+          # Install danger-js
+          npm install -g danger
+      - name: Run Danger
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: Danger
+        run: |
+          swift run danger-swift ci
