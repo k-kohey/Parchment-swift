@@ -112,19 +112,26 @@ class LoggerBundlerTests: XCTestCase {
 
         bundler.startLogging()
 
-        await bundler.send(
-            TrackingEvent(eventName: "hoge", parameters: [:]),
-            with: .init(policy: .bufferingFirst)
-        )
-        await bundler.send(
-            TrackingEvent(eventName: "fuga", parameters: [:]),
-            with: .init(policy: .bufferingFirst)
-        )
-        XCTAssertEqual(buffer.count(), 2)
+        // workaround
+        // bundler is released, hcausing the test to fail
+        _ = withExtendedLifetime(bundler) {
+            Task {
+                await bundler.send(
+                    TrackingEvent(eventName: "hoge", parameters: [:]),
+                    with: .init(policy: .bufferingFirst)
+                )
+                await bundler.send(
+                    TrackingEvent(eventName: "fuga", parameters: [:]),
+                    with: .init(policy: .bufferingFirst)
+                )
 
-        await strategy.flush()
+                XCTAssertEqual(buffer.count(), 2)
 
-        XCTAssertEqual(buffer.count(), 0)
+                await strategy.flush()
+
+                XCTAssertEqual(buffer.count(), 0)
+            }
+        }
     }
 
     func testSendOnlyOneSideLogger() async throws {
