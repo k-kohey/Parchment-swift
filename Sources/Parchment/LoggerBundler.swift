@@ -8,7 +8,7 @@ import Foundation
 
 struct DateProvider {
     static var mock: Date?
-    
+
     static func current() -> Date {
         Self.mock ?? .init()
     }
@@ -18,12 +18,12 @@ public final class LoggerBundler {
     private var components: [LoggerComponent]
     private let buffer: TrackingEventBufferAdapter
     private let flushStrategy: BufferedEventFlushScheduler
-    
+
     public var configMap: [LoggerComponentID: Configuration] = [:]
     public var mutations: [Mutation] = []
-    
-    private var loggingTask: Task<(), Never>?
-    
+
+    private var loggingTask: Task<Void, Never>?
+
     public init(
         components: [LoggerComponent],
         buffer: TrackingEventBuffer,
@@ -31,13 +31,13 @@ public final class LoggerBundler {
     ) {
         self.components = components
         self.buffer = .init(buffer)
-        self.flushStrategy = loggingStrategy
+        flushStrategy = loggingStrategy
     }
-    
+
     public func add(component: LoggerComponent) {
         components.append(component)
     }
-    
+
     public func send(_ event: Loggable, with option: LoggingOption = .init()) async {
         assert(!components.isEmpty, "Should set the any logger")
         let loggers: [LoggerComponent] = {
@@ -47,7 +47,7 @@ public final class LoggerBundler {
                 return components
             }
         }()
-        
+
         for logger in loggers {
             let record = BufferRecord(
                 destination: logger.id.value,
@@ -57,7 +57,7 @@ public final class LoggerBundler {
             await dispatch([record], for: logger, with: option)
         }
     }
-    
+
     private func dispatch(
         _ records: [BufferRecord],
         for logger: LoggerComponent,
@@ -77,7 +77,7 @@ public final class LoggerBundler {
             await buffer.save(records)
         }
     }
-    
+
     private func upload(_ records: [BufferRecord], with logger: LoggerComponent) async {
         let isSucceeded = await logger.send(records)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
@@ -90,11 +90,13 @@ public final class LoggerBundler {
 //            """)
         }
     }
-    
+
     public func startLogging() {
         loggingTask = Task { [weak self] in
             guard let self = self else {
-                assertionIfDebugMode("LoggerBundler instance should been retained by any object due to log events definitely")
+                assertionIfDebugMode(
+                    "LoggerBundler instance should been retained by any object due to log events definitely"
+                )
                 return
             }
             do {
@@ -106,18 +108,18 @@ public final class LoggerBundler {
             }
         }
     }
-    
+
     func cancell() {
         loggingTask?.cancel()
     }
-    
+
     private func bloadcast(_ records: [BufferRecord]) async {
         let recordEachLogger = Dictionary(grouping: records) { record in
             record.destination
         }
-        
+
         for (destination, records) in recordEachLogger {
-            await upload(records, with: self.components[.init(destination)])
+            await upload(records, with: components[.init(destination)])
         }
     }
 }
@@ -127,16 +129,16 @@ public extension LoggerBundler {
         case immediately
         case bufferingFirst
     }
-    
+
     enum LoggerScope {
         case only([LoggerComponentID])
         case exclude([LoggerComponentID])
     }
-    
+
     struct LoggingOption {
         let policy: LoggingPolicy
         let scope: LoggerScope?
-        
+
         public init(
             policy: LoggingPolicy = .immediately,
             scope: LoggerScope? = nil
@@ -150,7 +152,7 @@ public extension LoggerBundler {
 public extension LoggerBundler {
     struct Configuration {
         let allowBuffering: Bool
-        
+
         public init(allowBuffering: Bool) {
             self.allowBuffering = allowBuffering
         }
@@ -161,7 +163,7 @@ public extension LoggerBundler {
     func send(_ event: TrackingEvent, with option: LoggingOption = .init()) async {
         await send(event as Loggable, with: option)
     }
-    
+
     func send(_ event: [PartialKeyPath<Loggable>: Any], with option: LoggingOption = .init()) async {
         await send(event as Loggable, with: option)
     }
@@ -170,13 +172,13 @@ public extension LoggerBundler {
 private extension Sequence where Element == LoggerComponent {
     subscript(scope: LoggerBundler.LoggerScope) -> [Element] {
         switch scope {
-        case .only(let loggerIDs):
+        case let .only(loggerIDs):
             return filter { loggerIDs.contains($0.id) }
-        case .exclude(let loggerIDs):
+        case let .exclude(loggerIDs):
             return filter { !loggerIDs.contains($0.id) }
         }
     }
-    
+
     subscript(id: LoggerComponentID) -> Element {
         first(where: { $0.id == id })!
     }

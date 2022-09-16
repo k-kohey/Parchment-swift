@@ -8,7 +8,7 @@ import Foundation
 
 public struct LoggerComponentID: Hashable {
     let value: String
-    
+
     public init(_ value: String) {
         self.value = value
     }
