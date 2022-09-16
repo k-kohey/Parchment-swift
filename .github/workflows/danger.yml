@@ -24,4 +24,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd Danger
-          swift run danger-swift danger-swift ci
+          swift run danger-swift ci
