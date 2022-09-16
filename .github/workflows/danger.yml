@@ -20,6 +20,6 @@ jobs:
       - name: Run Danger
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ./Danger
         run: |
-          cd Danger
           swift run danger-swift ci
