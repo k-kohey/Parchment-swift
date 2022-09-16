@@ -1,6 +1,8 @@
 name: Danger
 
-on: [pull_request]
+on:
+  pull_request:
+    types: [opened, reopened]
 
 jobs:
   danger:
@@ -21,4 +23,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          danger-swift ci
+          cd Danger
+          swift run danger-swift danger-swift ci
