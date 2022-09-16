@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "SwiftLintPlugin",
+        "repositoryURL": "https://github.com/usami-k/SwiftLintPlugin",
+        "state": {
+          "branch": "main",
+          "revision": "f844a46b908910a34695fc429e2030b9e7003105",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

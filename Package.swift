@@ -9,36 +9,39 @@ let package = Package(
     products: [
         .library(
             name: "Parchment",
-            targets: ["Parchment"]),
+            targets: ["Parchment"]
+        ),
         .library(
             name: "ParchmentDefault",
-            targets: ["ParchmentDefault"])
+            targets: ["ParchmentDefault"]
+        ),
     ],
     dependencies: [
-        .package(
-            url: "https://github.com/technocidal/SwiftLint",
-            branch: "technocidal/swift-package-build-tool-plugin"
-        )
+        // The following PRs will be merged into the main branch and replaced with t and the official
+        // https://github.com/realm/SwiftLint/pull/4176
+        .package(url: "https://github.com/usami-k/SwiftLintPlugin", branch: "main"),
     ],
     targets: [
         .target(
             name: "Parchment",
             plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLintPlugin")
+                .plugin(name: "SwiftLintPlugin", package: "SwiftLintPlugin"),
             ]
         ),
         .target(
             name: "ParchmentDefault",
             dependencies: [.target(name: "Parchment")],
             plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLintPlugin")
+                .plugin(name: "SwiftLintPlugin", package: "SwiftLintPlugin"),
             ]
         ),
         .testTarget(
             name: "ParchmentTests",
-            dependencies: ["Parchment"]),
+            dependencies: ["Parchment"]
+        ),
         .testTarget(
             name: "ParchmentDefaultTests",
-            dependencies: ["ParchmentDefault"])
+            dependencies: ["ParchmentDefault"]
+        ),
     ]
 )
