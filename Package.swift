@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -17,22 +17,21 @@ let package = Package(
         ),
     ],
     dependencies: [
-        // The following PRs will be merged into the main branch and replaced with t and the official
-        // https://github.com/realm/SwiftLint/pull/4176
-        .package(url: "https://github.com/usami-k/SwiftLintPlugin", branch: "main"),
+        // TODO: versioning
+        .package(url: "https://github.com/realm/SwiftLint", branch: "main"),
     ],
     targets: [
         .target(
             name: "Parchment",
             plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLintPlugin"),
+                .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
             ]
         ),
         .target(
             name: "ParchmentDefault",
             dependencies: [.target(name: "Parchment")],
             plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLintPlugin"),
+                .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
             ]
         ),
         .testTarget(
