@@ -8,6 +8,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: "5.7.0"
       - uses: actions/checkout@v2
       - name: Build
         run: swift build
