@@ -8,11 +8,11 @@
 import Foundation
 
 public protocol Mutation {
-    func transform(_: Loggable, id: LoggerComponentID) -> Loggable
+    func transform(_: any Loggable, id: LoggerComponentID) -> any Loggable
 }
 
 extension Sequence where Element == Mutation {
-    func transform(_ events: Loggable, id: LoggerComponentID) -> Loggable {
+    func transform(_ events: any Loggable, id: LoggerComponentID) -> any Loggable {
         reduce(events) { partialResult, mutation in
             mutation.transform(partialResult, id: id)
         }

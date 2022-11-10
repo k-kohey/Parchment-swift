@@ -17,7 +17,7 @@
             "OS Version": UIDevice.current.systemVersion
         ]
 
-        public func transform(_ event: Loggable, id _: LoggerComponentID) -> Loggable {
+        public func transform(_ event: any Loggable, id _: LoggerComponentID) -> any Loggable {
             let log: LoggableDictonary = [
                 \.eventName: event.eventName,
                 \.parameters: event.parameters.merging(deviceParams) { left, _ in left }

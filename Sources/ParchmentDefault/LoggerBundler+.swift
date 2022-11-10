@@ -9,9 +9,9 @@ import Parchment
 
 public extension LoggerBundler {
     static func make(
-        components: [LoggerComponent],
-        buffer: TrackingEventBuffer = try! SQLiteBuffer(),
-        loggingStrategy: BufferedEventFlushScheduler = RegularlyPollingScheduler.default
+        components: [any LoggerComponent],
+        buffer: some TrackingEventBuffer = try! SQLiteBuffer(),
+        loggingStrategy: some BufferedEventFlushScheduler = RegularlyPollingScheduler.default
     ) -> LoggerBundler {
         Self(components: components, buffer: buffer, loggingStrategy: loggingStrategy)
     }

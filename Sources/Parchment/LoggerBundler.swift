@@ -15,19 +15,19 @@ struct DateProvider {
 }
 
 public final class LoggerBundler {
-    private var components: [LoggerComponent]
+    private var components: [any LoggerComponent]
     private let buffer: TrackingEventBufferAdapter
     private let flushStrategy: BufferedEventFlushScheduler
 
     public var configMap: [LoggerComponentID: Configuration] = [:]
-    public var mutations: [Mutation] = []
+    public var mutations: [any Mutation] = []
 
     private var loggingTask: Task<Void, Never>?
 
     public init(
-        components: [LoggerComponent],
-        buffer: TrackingEventBuffer,
-        loggingStrategy: BufferedEventFlushScheduler
+        components: [any LoggerComponent],
+        buffer: some TrackingEventBuffer,
+        loggingStrategy: some BufferedEventFlushScheduler
     ) {
         self.components = components
         self.buffer = .init(buffer)
@@ -38,9 +38,9 @@ public final class LoggerBundler {
         components.append(component)
     }
 
-    public func send(_ event: Loggable, with option: LoggingOption = .init()) async {
+    public func send(_ event: some Loggable, with option: LoggingOption = .init()) async {
         assert(!components.isEmpty, "Should set the any logger")
-        let loggers: [LoggerComponent] = {
+        let loggers: [any LoggerComponent] = {
             if let scope = option.scope {
                 return components[scope]
             } else {
@@ -60,7 +60,7 @@ public final class LoggerBundler {
 
     private func dispatch(
         _ records: [BufferRecord],
-        for logger: LoggerComponent,
+        for logger: some LoggerComponent,
         with option: LoggingOption
     ) async {
         switch option.policy {
@@ -78,7 +78,7 @@ public final class LoggerBundler {
         }
     }
 
-    private func upload(_ records: [BufferRecord], with logger: LoggerComponent) async {
+    private func upload(_ records: [BufferRecord], with logger: any LoggerComponent) async {
         let isSucceeded = await logger.send(records)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
         if shouldBuffering {
@@ -160,17 +160,17 @@ public extension LoggerBundler {
 }
 
 public extension LoggerBundler {
-    func send(_ event: TrackingEvent, with option: LoggingOption = .init()) async {
-        await send(event as Loggable, with: option)
+    func send(event: TrackingEvent, with option: LoggingOption = .init()) async {
+        await send(event, with: option)
     }
 
-    func send(_ event: [PartialKeyPath<Loggable>: Any], with option: LoggingOption = .init()) async {
-        await send(event as Loggable, with: option)
+    func send(event: [PartialKeyPath<Loggable>: Any], with option: LoggingOption = .init()) async {
+        await send(event, with: option)
     }
 }
 
 private extension Sequence where Element == LoggerComponent {
-    subscript(scope: LoggerBundler.LoggerScope) -> [Element] {
+    subscript(scope: LoggerBundler.LoggerScope) -> [any LoggerComponent] {
         switch scope {
         case let .only(loggerIDs):
             return filter { loggerIDs.contains($0.id) }
@@ -179,7 +179,7 @@ private extension Sequence where Element == LoggerComponent {
         }
     }
 
-    subscript(id: LoggerComponentID) -> Element {
+    subscript(id: LoggerComponentID) -> any LoggerComponent {
         first(where: { $0.id == id })!
     }
 }
