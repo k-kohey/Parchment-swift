@@ -20,9 +20,9 @@ extension TrackingEventBuffer {
 }
 
 public final actor TrackingEventBufferAdapter {
-    private let buffer: TrackingEventBuffer
+    private let buffer: any TrackingEventBuffer
 
-    init(_ buffer: TrackingEventBuffer) {
+    init(_ buffer: some TrackingEventBuffer) {
         self.buffer = buffer
     }
 
