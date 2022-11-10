@@ -23,6 +23,11 @@ let package = Package(
     targets: [
         .target(
             name: "Parchment",
+            swiftSettings: [
+                .unsafeFlags([
+                    "-strict-concurrency=complete"
+                ])
+            ],
             plugins: [
                 .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
             ]
@@ -30,6 +35,11 @@ let package = Package(
         .target(
             name: "ParchmentDefault",
             dependencies: [.target(name: "Parchment")],
+            swiftSettings: [
+                .unsafeFlags([
+                    "-strict-concurrency=complete"
+                ])
+            ],
             plugins: [
                 .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
             ]

@@ -11,11 +11,16 @@
     import UIKit
 
     public struct DeviceDataMutation: Mutation {
-        private let deviceParams = [
-            "Model": UIDevice.current.name,
-            "OS": UIDevice.current.systemName,
-            "OS Version": UIDevice.current.systemVersion
-        ]
+        private let deviceParams: [String: Any]
+
+        @MainActor
+        public init(device: UIDevice) {
+            deviceParams = [
+                "Model": device.name,
+                "OS": device.systemName,
+                "OS Version": device.systemVersion
+            ]
+        }
 
         public func transform(_ event: any Loggable, id _: LoggerComponentID) -> any Loggable {
             let log: LoggableDictonary = [
