@@ -29,9 +29,9 @@ private enum Event: Loggable {
 
 class MutationTests: XCTestCase {
     // 的確なテストに直す
-    func testTransform() throws {
+    @MainActor func testTransform() throws {
         let event = Event.hoge
-        let mutation: [Mutation] = [DeviceDataMutation()]
+        let mutation: [Mutation] = [DeviceDataMutation(device: .current)]
 
         let newEvent = mutation.transform(event, id: .init("hoge"))
 
