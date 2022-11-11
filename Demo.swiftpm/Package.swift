@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -36,8 +36,8 @@ let package = Package(
         .executableTarget(
             name: "AppModule",
             dependencies: [
-                .productItem(name: "Parchment", package: "Parchment", condition: nil),
-                .productItem(name: "ParchmentDefault", package: "Parchment", condition: nil),
+                .product(name: "Parchment", package: "Parchment"),
+                .product(name: "ParchmentDefault", package: "Parchment"),
             ]
         )
     ]

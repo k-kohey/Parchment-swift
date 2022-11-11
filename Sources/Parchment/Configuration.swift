@@ -5,6 +5,7 @@
 //  Created by k-kohey on 2021/10/26.
 //
 
+@MainActor
 public enum Configuration {
     public static var debugMode = false
 }
@@ -28,5 +29,7 @@ enum ConsoleLoggerCategory: String {
 // }
 
 func assertionIfDebugMode(_ msg: String) {
-    assert(Configuration.debugMode, msg)
+    Task { @MainActor in
+        assert(Configuration.debugMode, msg)
+    }
 }

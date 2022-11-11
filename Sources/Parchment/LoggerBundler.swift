@@ -6,17 +6,9 @@
 //
 import Foundation
 
-struct DateProvider {
-    static var mock: Date?
-
-    static func current() -> Date {
-        Self.mock ?? .init()
-    }
-}
-
-public final class LoggerBundler {
+public final actor LoggerBundler {
     private var components: [any LoggerComponent]
-    private let buffer: TrackingEventBufferAdapter
+    private let buffer: TrackingEventBuffer
     private let flushStrategy: BufferedEventFlushScheduler
 
     public var configMap: [LoggerComponentID: Configuration] = [:]
@@ -30,7 +22,7 @@ public final class LoggerBundler {
         loggingStrategy: some BufferedEventFlushScheduler
     ) {
         self.components = components
-        self.buffer = .init(buffer)
+        self.buffer = buffer
         flushStrategy = loggingStrategy
     }
 
@@ -52,7 +44,7 @@ public final class LoggerBundler {
             let record = BufferRecord(
                 destination: logger.id.value,
                 event: mutations.transform(event, id: logger.id),
-                timestamp: DateProvider.current()
+                timestamp: .init()
             )
             await dispatch([record], for: logger, with: option)
         }
@@ -91,26 +83,13 @@ public final class LoggerBundler {
         }
     }
 
-    public func startLogging() {
-        loggingTask = Task { [weak self] in
-            guard let self = self else {
-                assertionIfDebugMode(
-                    "LoggerBundler instance should been retained by any object due to log events definitely"
-                )
-                return
-            }
-            do {
-                for try await records in await self.flushStrategy.schedule(with: self.buffer) {
-                    await self.bloadcast(records)
-                }
-            } catch {
-//                console()?.log("\(error.localizedDescription)")
+    @discardableResult
+    public func startLogging() -> Task<Void, Error> {
+        Task {
+            for try await records in await flushStrategy.schedule(with: buffer) {
+                await self.bloadcast(records)
             }
         }
-    }
-
-    func cancell() {
-        loggingTask?.cancel()
     }
 
     private func bloadcast(_ records: [BufferRecord]) async {
@@ -164,7 +143,7 @@ public extension LoggerBundler {
         await send(event, with: option)
     }
 
-    func send(event: [PartialKeyPath<Loggable>: Any], with option: LoggingOption = .init()) async {
+    func send(event: [PartialKeyPath<Loggable>: Sendable], with option: LoggingOption = .init()) async {
         await send(event, with: option)
     }
 }

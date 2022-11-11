@@ -11,7 +11,7 @@ public struct BufferRecord: Loggable, LoggerSendable, Equatable {
     public let id: String
     public let destination: String
     public let eventName: String
-    public let parameters: [String: Any]
+    public let parameters: [String: Sendable]
     public let timestamp: Date
 
     public init(id: String = UUID().uuidString, destination: String, event: Loggable, timestamp: Date) {
@@ -26,7 +26,7 @@ public struct BufferRecord: Loggable, LoggerSendable, Equatable {
         id: String = UUID().uuidString,
         destination: String,
         eventName: String,
-        parameters: [String: Any],
+        parameters: [String: Sendable],
         timestamp: Date
     ) {
         self.id = id

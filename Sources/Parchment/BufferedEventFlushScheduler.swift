@@ -6,7 +6,6 @@
 //
 import Foundation
 
-public protocol BufferedEventFlushScheduler {
-    func schedule(with buffer: TrackingEventBufferAdapter) async -> AsyncThrowingStream<[BufferRecord], Error>
-    func cancel()
+public protocol BufferedEventFlushScheduler: Sendable {
+    func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[BufferRecord], Error>
 }

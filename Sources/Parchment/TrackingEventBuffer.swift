@@ -7,34 +7,14 @@
 
 import Foundation
 
-public protocol TrackingEventBuffer {
-    func save(_ event: [BufferRecord])
-    func load(limit: Int64) -> [BufferRecord]
-    func count() -> Int
+public protocol TrackingEventBuffer: Sendable {
+    func save(_ event: [BufferRecord]) async
+    func load(limit: Int64) async -> [BufferRecord]
+    func count() async -> Int
 }
 
-extension TrackingEventBuffer {
-    func load() -> [BufferRecord] {
-        load(limit: -1)
-    }
-}
-
-public final actor TrackingEventBufferAdapter {
-    private let buffer: any TrackingEventBuffer
-
-    init(_ buffer: some TrackingEventBuffer) {
-        self.buffer = buffer
-    }
-
-    public func save(_ event: [BufferRecord]) {
-        buffer.save(event)
-    }
-
-    public func load(limit: Int64 = -1) -> [BufferRecord] {
-        buffer.load(limit: limit)
-    }
-
-    public func count() -> Int {
-        buffer.count()
+public extension TrackingEventBuffer {
+    func load() async -> [BufferRecord] {
+        await load(limit: -1)
     }
 }
