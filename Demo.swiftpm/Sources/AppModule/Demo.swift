@@ -7,10 +7,11 @@ extension LoggerComponentID {
 }
 
 struct MyLogger: LoggerComponent {
-    static var id: LoggerComponentID = .my
+    static let id: LoggerComponentID = .my
 
     func send(_ log: [LoggerSendable]) async -> Bool {
         print("send \(log)")
+        try? await Task.sleep(nanoseconds: 1000_000)
         return true
     }
 }
@@ -36,14 +37,12 @@ struct ExampleAppApp: App {
         WindowGroup {
             Button("send event") {
                 Task {
-                    await logger.send(.tap, with: .init(policy: .bufferingFirst))
+                    await logger.send(event: .tap, with: .init(policy: .bufferingFirst))
                 }
             }
-            .onAppear {
-                logger.startLogging()
-                Task {
-                    await logger.send(.impletion("home"))
-                }
+            .task {
+                await logger.startLogging()
+                await logger.send(event: .impletion("home"))
             }
         }
     }
