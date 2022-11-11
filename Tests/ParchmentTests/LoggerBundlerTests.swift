@@ -76,10 +76,12 @@ final class BufferedEventFlushStrategyMock: BufferedEventFlushScheduler, @unchec
     func cancel() {}
 
     func flush() async {
-        await continuation?.yield(buffer!.load(limit: .max))
+        let events = await buffer!.load(limit: .max)
+        continuation?.yield(events)
     }
 }
 
+@MainActor
 class LoggerBundlerTests: XCTestCase {
     func testSendImmediately() async throws {
         let logger = LoggerA()
@@ -110,28 +112,17 @@ class LoggerBundlerTests: XCTestCase {
             loggingStrategy: strategy
         )
 
-        await bundler.startLogging()
+        _ = await bundler.startLogging()
+        await bundler.send(
+            TrackingEvent(eventName: "hoge", parameters: [:]),
+            with: .init(policy: .bufferingFirst)
+        )
 
-        // workaround
-        // bundler is released, hcausing the test to fail
-        _ = withExtendedLifetime(bundler) {
-            Task {
-                await bundler.send(
-                    TrackingEvent(eventName: "hoge", parameters: [:]),
-                    with: .init(policy: .bufferingFirst)
-                )
-                await bundler.send(
-                    TrackingEvent(eventName: "fuga", parameters: [:]),
-                    with: .init(policy: .bufferingFirst)
-                )
+        XCTAssertEqual(buffer.count(), 1, "Buffre should retain events")
 
-                XCTAssertEqual(buffer.count(), 2)
+        await strategy.flush()
 
-                await strategy.flush()
-
-                XCTAssertEqual(buffer.count(), 0)
-            }
-        }
+        XCTAssertEqual(buffer.count(), 0, "Buffre should flush events")
     }
 
     func testSendOnlyOneSideLogger() async throws {
