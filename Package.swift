@@ -16,10 +16,6 @@ let package = Package(
             targets: ["ParchmentDefault"]
         ),
     ],
-    dependencies: [
-        // TODO: versioning
-        .package(url: "https://github.com/realm/SwiftLint", branch: "main"),
-    ],
     targets: [
         .target(
             name: "Parchment",
@@ -27,9 +23,6 @@ let package = Package(
                 .unsafeFlags([
                     "-strict-concurrency=complete"
                 ])
-            ],
-            plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
             ]
         ),
         .target(
@@ -39,9 +32,6 @@ let package = Package(
                 .unsafeFlags([
                     "-strict-concurrency=complete"
                 ])
-            ],
-            plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
             ]
         ),
         .testTarget(

@@ -6,41 +6,47 @@ import XCTest
 final class SQLiteBufferTests: XCTestCase {
     private var buffer: SQLiteBuffer!
 
+    @MainActor
     override static func setUp() {
         Configuration.debugMode = true
     }
 
     override func setUp() {
         self.buffer = try! SQLiteBuffer()
-        self.buffer.clear()
+        Task {
+            await self.buffer.clear()
+        }
     }
 
-    func testDequeue() throws {
+    func testDequeue() async throws {
         let record = BufferRecord(destination: "hoge", eventName: "a", parameters: [:], timestamp: .init(timeIntervalSince1970: 0))
 
-        buffer.save([record])
-        let results = buffer.load(limit: 1)
+        await buffer.save([record])
+        let results = await buffer.load(limit: 1)
+        let count = await buffer.count()
 
         XCTAssertEqual(results.first, record)
-        XCTAssertEqual(buffer.count(), 0)
+        XCTAssertEqual(count, 0)
     }
 
-    func testDequeue_whenMultipleRecordsWereInserted() {
+    func testDequeue_whenMultipleRecordsWereInserted() async {
         let records = makeRecords()
 
-        buffer.save(records)
+        await buffer.save(records)
 
-        let results = buffer.load()
+        let results = await buffer.load()
+        let count = await buffer.count()
+
         XCTAssertEqual(results, records)
-        XCTAssertEqual(buffer.count(), 0)
+        XCTAssertEqual(count, 0)
     }
 
-    func testCount() {
+    func testCount() async {
         let records = makeRecords()
 
-        buffer.save(records)
+        await buffer.save(records)
+        let results = await buffer.count()
 
-        let results = buffer.count()
         XCTAssertEqual(results, records.count)
     }
 

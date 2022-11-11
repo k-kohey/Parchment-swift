@@ -8,64 +8,48 @@
 import Foundation
 import Parchment
 
-public final class RegularlyPollingScheduler: BufferedEventFlushScheduler {
-    public static let `default` = RegularlyPollingScheduler(timeInterval: 60)
-
-    let timeInterval: TimeInterval
+public struct RegularlyPollingScheduler: BufferedEventFlushScheduler, Sendable {
+    let timeInterval: UInt
     let limitOnNumberOfEvent: Int
 
-    var lastFlushedDate: Date = .init()
-
-    private weak var timer: Timer?
-
     public init(
-        timeInterval: TimeInterval,
-        limitOnNumberOfEvent: Int = .max,
-        dispatchQueue _: DispatchQueue? = nil
+        timeInterval: UInt,
+        limitOnNumberOfEvent: Int = .max
     ) {
         self.timeInterval = timeInterval
         self.limitOnNumberOfEvent = limitOnNumberOfEvent
     }
 
-    public func schedule(with buffer: TrackingEventBufferAdapter) async -> AsyncThrowingStream<[BufferRecord], Error> {
+    public func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[BufferRecord], Error> {
         AsyncThrowingStream { continuation in
-            let timer = Timer(fire: .init(), interval: 1, repeats: true) { _ in
-                Task { [weak self] in
-                    await self?.tick(with: buffer) {
-                        continuation.yield($0)
+            Task {
+                while !Task.isCancelled {
+                    let records = await buffer.load()
+                    continuation.yield(records)
+                    do {
+                        try await Task.sleep(nanoseconds: UInt64(timeInterval) * 1000_000_000)
+                    } catch {
+                        break
                     }
                 }
+                continuation.finish()
             }
-            RunLoop.main.add(timer, forMode: .common)
-            self.timer = timer
-        }
-    }
 
-    public func cancel() {
-        timer?.invalidate()
-    }
-
-    private func tick(with buffer: TrackingEventBufferAdapter, didFlush: @escaping ([BufferRecord]) -> Void) async {
-        guard await buffer.count() > 0 else { return }
-
-        let flush = {
-            let records = await buffer.load()
-
-//            console()?.log("✨ Flush \(records.count) event")
-            didFlush(records)
-        }
-
-        let count = await buffer.count()
-        if limitOnNumberOfEvent < count {
-            await flush()
-            return
-        }
-
-        let timeSinceLastFlush = abs(lastFlushedDate.timeIntervalSinceNow)
-        if timeInterval < timeSinceLastFlush {
-            await flush()
-            lastFlushedDate = Date()
-            return
+            Task {
+                while !Task.isCancelled {
+                    let count = await buffer.count()
+                    if limitOnNumberOfEvent < count {
+                        let records = await buffer.load()
+                        continuation.yield(records)
+                    }
+                    do {
+                        try await Task.sleep(nanoseconds: 1000_000_000)
+                    } catch {
+                        break
+                    }
+                }
+                continuation.finish()
+            }
         }
     }
 }

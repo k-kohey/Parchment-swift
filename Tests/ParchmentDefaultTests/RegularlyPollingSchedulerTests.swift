@@ -10,7 +10,7 @@ import Foundation
 @testable import ParchmentDefault
 import XCTest
 
-final class EventQueueMock: TrackingEventBuffer {
+final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
     private var records: [BufferRecord] = []
 
     func save(_ e: [BufferRecord]) {
@@ -38,14 +38,15 @@ final class EventQueueMock: TrackingEventBuffer {
     }
 }
 
+@MainActor
 class RegularlyPollingSchedulerTests: XCTestCase {
     func testSchedule() throws {
-        let scheduler = RegularlyPollingScheduler(timeInterval: 0.1)
+        let scheduler = RegularlyPollingScheduler(timeInterval: 1)
         let buffer = EventQueueMock()
         let event = TrackingEvent(eventName: "hoge", parameters: [:])
 
         Task {
-            for try await result in await scheduler.schedule(with: .init(buffer)) {
+            for try await result in await scheduler.schedule(with: buffer) {
                 XCTAssertEqual(event.eventName, result.first?.eventName)
                 XCTAssertTrue(NSDictionary(dictionary: event.parameters).isEqual(to: result.first?.parameters ?? [:]))
             }

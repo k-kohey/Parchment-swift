@@ -9,7 +9,7 @@ import Foundation
 import Parchment
 import SQLite3
 
-public final class SQLiteBuffer: TrackingEventBuffer {
+public final actor SQLiteBuffer: TrackingEventBuffer {
     enum SQLiteBufferError: Error {
         case dbfileCanNotBeenOpend
         case failedToCreateSQLiteTable
@@ -50,7 +50,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         }
     }
 
-    public func save(_ e: [BufferRecord]) {
+    public func save(_ e: [BufferRecord]) async {
         let query = """
         INSERT INTO Events (
             id,
@@ -115,7 +115,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         }
     }
 
-    public func load(limit: Int64) -> [BufferRecord] {
+    public func load(limit: Int64) async -> [BufferRecord] {
         let query: String
         if limit < 0 {
             query = "SELECT * FROM Events ORDER BY timestamp"
@@ -141,11 +141,11 @@ public final class SQLiteBuffer: TrackingEventBuffer {
             let timestamp = sqlite3_column_int64(context, 2)
             let eventName = String(cString: sqlite3_column_text(context, 3))
 
-            let parameters: [String: Any] = {
+            let parameters: [String: Sendable] = {
                 guard let bytes = sqlite3_column_blob(context, 4) else { return [:] }
                 let count = Int(sqlite3_column_bytes(context, 4))
                 let data = Data(bytes: bytes, count: count)
-                return (try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]) ?? [:]
+                return (try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Sendable]) ?? [:]
             }()
 
             result.append(
@@ -164,7 +164,7 @@ public final class SQLiteBuffer: TrackingEventBuffer {
         return success ? result : []
     }
 
-    public func count() -> Int {
+    public func count() async -> Int {
         let query = "SELECT COUNT(*) FROM Events"
         let context = prepare(query: query)
 
@@ -251,5 +251,7 @@ extension String {
 }
 
 func assertionIfDebugMode(_ msg: String) {
-    assert(Configuration.debugMode, msg)
+    Task { @MainActor in
+        assert(Configuration.debugMode, msg)
+    }
 }
