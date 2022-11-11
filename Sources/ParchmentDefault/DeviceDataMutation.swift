@@ -11,7 +11,7 @@
     import UIKit
 
     public struct DeviceDataMutation: Mutation {
-        private let deviceParams: [String: Any]
+        private let deviceParams: [String: Sendable]
 
         @MainActor
         public init(device: UIDevice) {

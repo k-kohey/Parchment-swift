@@ -13,7 +13,7 @@ private extension LoggerComponentID {
     static let b = LoggerComponentID("B")
 }
 
-final class LoggerA: LoggerComponent {
+final class LoggerA: LoggerComponent, @unchecked Sendable {
     static let id: LoggerComponentID = .a
 
     var _send: (() -> (Bool))?
@@ -23,7 +23,7 @@ final class LoggerA: LoggerComponent {
     }
 }
 
-final class LoggerB: LoggerComponent {
+final class LoggerB: LoggerComponent, @unchecked Sendable {
     static let id: LoggerComponentID = .b
 
     var _send: (() -> (Bool))?
@@ -33,7 +33,7 @@ final class LoggerB: LoggerComponent {
     }
 }
 
-final class EventQueueMock: TrackingEventBuffer {
+final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
     private var records: [BufferRecord] = []
 
     func save(_ e: [BufferRecord]) {
@@ -61,12 +61,12 @@ final class EventQueueMock: TrackingEventBuffer {
     }
 }
 
-final class BufferedEventFlushStrategyMock: BufferedEventFlushScheduler {
-    private var buffer: TrackingEventBufferAdapter?
+final class BufferedEventFlushStrategyMock: BufferedEventFlushScheduler, @unchecked Sendable {
+    private var buffer: TrackingEventBuffer?
 
     private var continuation: AsyncThrowingStream<[BufferRecord], Error>.Continuation?
 
-    func schedule(with buffer: TrackingEventBufferAdapter) async -> AsyncThrowingStream<[BufferRecord], Error> {
+    func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[BufferRecord], Error> {
         self.buffer = buffer
         return .init { continuation in
             self.continuation = continuation
@@ -110,7 +110,7 @@ class LoggerBundlerTests: XCTestCase {
             loggingStrategy: strategy
         )
 
-        bundler.startLogging()
+        await bundler.startLogging()
 
         // workaround
         // bundler is released, hcausing the test to fail

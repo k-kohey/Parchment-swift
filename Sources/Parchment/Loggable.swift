@@ -7,16 +7,16 @@
 
 import Foundation
 
-public protocol Loggable {
+public protocol Loggable: Sendable {
     var eventName: String { get }
-    var parameters: [String: Any] { get }
+    var parameters: [String: Sendable] { get }
 }
 
 public struct TrackingEvent: Loggable {
     public let eventName: String
-    public let parameters: [String: Any]
+    public let parameters: [String: Sendable]
 
-    public init(eventName: String, parameters: [String: Any]) {
+    public init(eventName: String, parameters: [String: Sendable]) {
         self.eventName = eventName
         self.parameters = parameters
     }

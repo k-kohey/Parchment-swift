@@ -19,7 +19,7 @@ private enum Event: Loggable {
         }
     }
 
-    var parameters: [String: Any] {
+    var parameters: [String: Sendable] {
         switch self {
         case .hoge:
             return ["hello": "world"]
@@ -28,6 +28,7 @@ private enum Event: Loggable {
 }
 
 class MutationTests: XCTestCase {
+#if canImport(UIKit)
     // 的確なテストに直す
     @MainActor func testTransform() throws {
         let event = Event.hoge
@@ -37,4 +38,5 @@ class MutationTests: XCTestCase {
 
         XCTAssertTrue(newEvent.parameters.count > 1)
     }
+#endif
 }
