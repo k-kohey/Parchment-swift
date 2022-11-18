@@ -30,6 +30,11 @@ public final actor LoggerBundler {
         components.append(component)
     }
 
+    /// Sends a Log to the retained LoggerComponents.
+    /// A LoggerComponent should be added before this function is called.
+    /// - Parameters:
+    ///   - event: Log to be sent
+    ///   - option: Option the method and target of sending.
     public func send(_ event: some Loggable, with option: LoggingOption = .init()) async {
         assert(!components.isEmpty, "Should set the any logger")
         let loggers: [any LoggerComponent] = {
