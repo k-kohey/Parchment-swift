@@ -8,6 +8,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - uses: actions/checkout@v3
       - name: install danger-JS
         run: |
           npm install -g danger
