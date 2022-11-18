@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/danger/swift.git",
       "state" : {
-        "revision" : "0d62144a8bdfdb087c476ac3e88e96491c158a7b",
-        "version" : "3.14.0"
+        "revision" : "579323889f26e6fb1ddb2cc5d98b1ab698bd2578",
+        "version" : "3.14.2"
       }
     },
     {
