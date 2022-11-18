@@ -9,13 +9,20 @@ jobs:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
-      - name: run generate-documentation
-        run: swift package --allow-writing-to-directory docs
+      - name: run generate-documentation for Parchment
+        run: swift package --allow-writing-to-directory docs/Parchment
           generate-documentation --target Parchment
           --disable-indexing
           --transform-for-static-hosting
           --hosting-base-path Parchment-swift
-          --output-path docs
+          --output-path docs/Parchment
+      - name: run generate-documentation for ParchmentDefault
+        run: swift package --allow-writing-to-directory docs/ParchmentDefault
+          generate-documentation --target ParchmentDefault
+          --disable-indexing
+          --transform-for-static-hosting
+          --hosting-base-path Parchment-swift
+          --output-path docs/ParchmentDefault
       - name: deploy to github pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
