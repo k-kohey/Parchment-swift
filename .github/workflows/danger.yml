@@ -5,7 +5,7 @@ on: [pull_request]
 jobs:
   danger:
     name: Danger
-    runs-on: macos-latest
+    runs-on: macos-12
 
     steps:
       - uses: actions/checkout@v3
@@ -16,6 +16,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls
           cd Danger
           swift run danger-swift ci
