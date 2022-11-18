@@ -1,0 +1,20 @@
+name: Danger
+
+on: [pull_request]
+
+jobs:
+  danger:
+    name: Danger
+    runs-on: macos-12
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: install danger-JS
+        run: |
+          npm install -g danger
+      - name: Run Danger
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd Danger
+          swift run danger-swift ci
