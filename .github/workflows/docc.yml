@@ -18,14 +18,14 @@ jobs:
           generate-documentation --target Parchment
           --disable-indexing
           --transform-for-static-hosting
-          --hosting-base-path Parchment-swift
+          --hosting-base-path Parchment-swift/Parchment
           --output-path docs/Parchment
       - name: run generate-documentation for ParchmentDefault
         run: swift package --allow-writing-to-directory docs/ParchmentDefault
           generate-documentation --target ParchmentDefault
           --disable-indexing
           --transform-for-static-hosting
-          --hosting-base-path Parchment-swift
+          --hosting-base-path Parchment-swift/ParchmentDefault
           --output-path docs/ParchmentDefault
       - name: deploy to github pages
         uses: peaceiris/actions-gh-pages@v3
