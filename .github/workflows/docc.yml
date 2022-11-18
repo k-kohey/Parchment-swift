@@ -18,7 +18,7 @@ jobs:
           --output-path docs/Parchment
       - name: run generate-documentation for ParchmentDefault
         run: swift package --allow-writing-to-directory docs/ParchmentDefault
-          generate-documentation --target Parchment
+          generate-documentation --target ParchmentDefault
           --disable-indexing
           --transform-for-static-hosting
           --hosting-base-path Parchment-swift
