@@ -7,6 +7,11 @@ Parchment has three features:
 2. Log is buffed and can be sent at any time.
 3. Easy to combine your source code and replace logger implemention.
 
+# [WIP]API Document
+
+- https://k-kohey.github.io/Parchment-swift/Parchment/documentation/parchment/
+- https://k-kohey.github.io/Parchment-swift/ParchmentDefault/documentation/parchmentdefault/
+
 # Usage
 
 ## 1. Definision logging event
