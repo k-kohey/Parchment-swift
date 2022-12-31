@@ -1,8 +1,0 @@
-Event name,Parameter scheme,Description,,,,
-user_create,"{
-  “name”: “Taro”,
-  “age”: 16
-}",ユーザが作られた際のイベント,,,,
-Impletion,"{
-  “screen”: “Home”
-}",画面のインプレッション,,,,
