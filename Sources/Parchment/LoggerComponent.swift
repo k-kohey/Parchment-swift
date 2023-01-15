@@ -6,7 +6,7 @@
 //
 import Foundation
 
-public struct LoggerComponentID: Hashable {
+public struct LoggerComponentID: Hashable, Sendable {
     let value: String
 
     public init(_ value: String) {

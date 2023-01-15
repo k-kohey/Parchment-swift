@@ -45,13 +45,17 @@ public final actor LoggerBundler {
             }
         }()
 
-        for logger in loggers {
-            let record = BufferRecord(
-                destination: logger.id.value,
-                event: mutations.transform(event, id: logger.id),
-                timestamp: .init()
-            )
-            await dispatch([record], for: logger, with: option)
+        await withTaskGroup(of: Void.self) { group in
+            for logger in loggers {
+                let record = BufferRecord(
+                    destination: logger.id.value,
+                    event: mutations.transform(event, id: logger.id),
+                    timestamp: .init()
+                )
+                group.addTask {
+                    await self.dispatch([record], for: logger, with: option)
+                }
+            }
         }
     }
 
@@ -91,35 +95,34 @@ public final actor LoggerBundler {
     @discardableResult
     public func startLogging() -> Task<Void, Error> {
         Task {
-            for try await records in await flushStrategy.schedule(with: buffer) {
-                await self.bloadcast(records)
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for try await records in await flushStrategy.schedule(with: buffer) {
+                    group.addTask {
+                        let recordEachLogger = Dictionary(grouping: records) { record in
+                            record.destination
+                        }
+                        for (destination, records) in recordEachLogger {
+                            await self.upload(records, with: self.components[.init(destination)])
+                        }
+                    }
+                }
             }
-        }
-    }
-
-    private func bloadcast(_ records: [BufferRecord]) async {
-        let recordEachLogger = Dictionary(grouping: records) { record in
-            record.destination
-        }
-
-        for (destination, records) in recordEachLogger {
-            await upload(records, with: components[.init(destination)])
         }
     }
 }
 
 public extension LoggerBundler {
-    enum LoggingPolicy {
+    enum LoggingPolicy: Sendable {
         case immediately
         case bufferingFirst
     }
 
-    enum LoggerScope {
+    enum LoggerScope: Sendable {
         case only([LoggerComponentID])
         case exclude([LoggerComponentID])
     }
 
-    struct LoggingOption {
+    struct LoggingOption: Sendable {
         let policy: LoggingPolicy
         let scope: LoggerScope?
 
