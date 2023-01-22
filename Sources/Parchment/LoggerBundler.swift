@@ -35,19 +35,18 @@ public final actor LoggerBundler {
     /// - Parameters:
     ///   - event: Log to be sent
     ///   - option: Option the method and target of sending.
-    public func send(_ event: some Loggable, with option: LoggingOption = .init()) async {
-        assert(!components.isEmpty, "Should set the any logger")
-        let loggers: [any LoggerComponent] = {
+    public nonisolated func send(_ event: some Loggable, with option: LoggingOption = .init()) async {
+        func loggers() async -> [any LoggerComponent] {
             if let scope = option.scope {
-                return components[scope]
+                return await components[scope]
             } else {
-                return components
+                return await components
             }
-        }()
+        }
 
         await withTaskGroup(of: Void.self) { group in
-            for logger in loggers {
-                let record = BufferRecord(
+            for logger in await loggers() {
+                let record = await BufferRecord(
                     destination: logger.id.value,
                     event: mutations.transform(event, id: logger.id),
                     timestamp: .init()
