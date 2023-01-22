@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol Mutation {
+public protocol Mutation: Sendable {
     func transform(_: any Loggable, id: LoggerComponentID) -> any Loggable
 }
 
