@@ -10,7 +10,7 @@ import XCTest
 
 private struct MutationMock: Mutation {
     var _transform: Transform?
-    func transform(_ l: Loggable, id: LoggerComponentID) -> Loggable {
+    func transform(_ l: Loggable, id: LoggerComponentID) -> AnyLoggable {
         _transform!(l, id)
     }
 
@@ -22,7 +22,7 @@ private struct MutationMock: Mutation {
 final class TransformTests: XCTestCase {
     func testComposed() {
         let mutationA = MutationMock { l, id in
-            TrackingEvent(
+            AnyLoggable(
                 eventName: l.eventName,
                 parameters: l.parameters.merging(["hoge": 0], uniquingKeysWith: { _, r in
                     r
@@ -30,7 +30,7 @@ final class TransformTests: XCTestCase {
             )
         }
         let mutationB = MutationMock { l, id in
-            TrackingEvent(
+            AnyLoggable(
                 eventName: l.eventName,
                 parameters: l.parameters.merging(["fuga": 1], uniquingKeysWith: { _, r in
                     r

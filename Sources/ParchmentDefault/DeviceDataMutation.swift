@@ -22,12 +22,10 @@
             ]
         }
 
-        public func transform(_ event: any Loggable, id _: LoggerComponentID) -> any Loggable {
-            let log: LoggableDictonary = [
-                \.eventName: event.eventName,
-                \.parameters: event.parameters.merging(deviceParams) { left, _ in left }
-            ]
-            return log
+        public func transform(_ event: any Loggable, id _: LoggerComponentID) -> AnyLoggable {
+            var event = AnyLoggable(event)
+            event.parameters = event.parameters.merging(deviceParams) { left, _ in left }
+            return event
         }
     }
 
