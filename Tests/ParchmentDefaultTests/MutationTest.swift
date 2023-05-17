@@ -34,7 +34,7 @@ class MutationTests: XCTestCase {
         let event = Event.hoge
         let mutation: [Mutation] = [DeviceDataMutation(device: .current)]
 
-        let newEvent = mutation.transform(event, id: .init("hoge"))
+        let newEvent = mutation.composed()(event, .init("hoge"))
 
         XCTAssertTrue(newEvent.parameters.count > 1)
     }

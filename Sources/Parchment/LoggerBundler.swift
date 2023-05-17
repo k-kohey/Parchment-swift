@@ -12,22 +12,28 @@ public final actor LoggerBundler {
     private let flushStrategy: BufferedEventFlushScheduler
 
     public var configMap: [LoggerComponentID: Configuration] = [:]
-    public var mutations: [any Mutation] = []
+    private(set) var transform: Transform
 
     private var loggingTask: Task<Void, Never>?
 
     public init(
         components: [any LoggerComponent],
         buffer: some TrackingEventBuffer,
-        loggingStrategy: some BufferedEventFlushScheduler
+        loggingStrategy: some BufferedEventFlushScheduler,
+        mutations: [Mutation] = []
     ) {
         self.components = components
         self.buffer = buffer
         flushStrategy = loggingStrategy
+        transform = mutations.composed()
     }
 
     public func add(component: LoggerComponent) {
         components.append(component)
+    }
+
+    public func add(mutations: [Mutation]) {
+        transform = ([transform, mutations.composed()]).composed()
     }
 
     /// Sends a Log to the retained LoggerComponents.
@@ -48,7 +54,7 @@ public final actor LoggerBundler {
             for logger in await loggers() {
                 let record = await BufferRecord(
                     destination: logger.id.value,
-                    event: mutations.transform(event, id: logger.id),
+                    event: transform(event, logger.id),
                     timestamp: .init()
                 )
                 group.addTask {

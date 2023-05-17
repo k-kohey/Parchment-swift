@@ -12,12 +12,5 @@ public protocol Loggable: Sendable {
     var parameters: [String: Sendable] { get }
 }
 
-public struct TrackingEvent: Loggable {
-    public let eventName: String
-    public let parameters: [String: Sendable]
-
-    public init(eventName: String, parameters: [String: Sendable]) {
-        self.eventName = eventName
-        self.parameters = parameters
-    }
-}
+// TODO: Delete
+public typealias TrackingEvent = AnyLoggable
