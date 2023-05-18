@@ -50,7 +50,7 @@ public struct Tracked<Value: Sendable, ScopeValue: Sendable> {
 
     public init(
         wrappedValue: Value,
-        logger: LoggerBundler,
+        with logger: LoggerBundler,
         option: LoggerBundler.LoggingOption = .init()
     )  where ScopeValue == Never {
         self.init(
@@ -70,3 +70,20 @@ public struct Tracked<Value: Sendable, ScopeValue: Sendable> {
         self.wrappedValue = wrappedValue
     }
 }
+
+#if canImport(SwiftUI)
+
+import SwiftUI
+
+public extension Binding {
+    func erase<InnerType: Sendable, Scope: Sendable>() -> Binding<InnerType> where Value == Tracked<InnerType, Scope> {
+        Binding<InnerType>(
+            get: {
+                wrappedValue.wrappedValue
+            }, set: {
+                wrappedValue.wrappedValue = $0
+            })
+    }
+}
+
+#endif
