@@ -37,8 +37,8 @@ let logger = LoggerBundler.make(
 
 @main
 struct ExampleAppApp: App {
-    @State @Tracked(with: logger) var count: Int = 0
-    @State @Tracked(with: logger) var text = ""
+    @State @Tracked(name: "count", with: logger) var count: Int = 0
+    @State @Tracked(name: "text", with: logger, scope: \.description) var text = ""
 
     var body: some Scene {
         WindowGroup {
