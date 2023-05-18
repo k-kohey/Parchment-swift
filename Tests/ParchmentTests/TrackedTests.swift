@@ -21,8 +21,12 @@ private struct State: Equatable {
 }
 
 final class TrackedTests: XCTestCase {
-    @Tracked(logger: bundler) private var state: State? = nil
-    @Tracked(logger: bundler, scope: \.?.name) private var scopedState: State? = nil
+    @Tracked(
+        name: "PropetyTrackingEvent", with: bundler, option: .init(policy: .immediately)
+    ) private var state: State? = nil
+    @Tracked(
+        name: "PropetyTrackingEvent", with: bundler, scope: \.?.name, option: .init(policy: .immediately)
+    ) private var scopedState: State? = nil
 
     func testTracked() async throws {
         var result: LoggerSendable?
