@@ -27,7 +27,7 @@ public final actor SQLiteBuffer: TrackingEventBuffer {
             in: .userDomainMask,
             appropriateFor: nil,
             create: true
-        ).appendingPathComponent("Events.sqlite3")
+        ).appendingPathComponent("\(tableName).sqlite3")
 
         db = try Connection(dbFilePath.absoluteString)
         events = Table(tableName)
@@ -56,9 +56,12 @@ public final actor SQLiteBuffer: TrackingEventBuffer {
 
     public func load(limit: Int?) throws -> [BufferRecord] {
         let target = events.order(Column.timestamp).limit(limit)
-        let result = try db.prepare(target).map { row in
-            try decoder.decode(BufferRecord.self, from: row[Column.event])
-        }
+        let entities = try db.prepare(target)
+            .map { $0[Column.event] }
+            .joined(separator: ",".data(using: .utf8)!)
+        let jsonData = "[".data(using: .utf8)! + entities + "]".data(using: .utf8)!
+
+        let result = try decoder.decode([BufferRecord].self, from: jsonData)
 
         if limit != nil {
             // Cannot Delete if limit is not specified

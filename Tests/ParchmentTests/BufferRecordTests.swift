@@ -86,8 +86,6 @@ class BufferRecordTests: XCTestCase {
         decoder.dateDecodingStrategy = .iso8601
         let result = try decoder.decode(BufferRecord.self, from: jsonString)
 
-        print(dump(result))
-
         XCTAssertEqual(
             result,
             BufferRecord(
