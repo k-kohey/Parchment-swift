@@ -28,7 +28,7 @@ extension TrackingEvent {
 
 let logger = LoggerBundler.make(
     components: [MyLogger()],
-    loggingStrategy: RegularlyPollingScheduler(timeInterval: 5)
+    bufferFlowController: DefaultBufferFlowController(pollingInterval: 5)
 )
 
 @main

@@ -13,7 +13,9 @@ class LoggerBundlerTests: XCTestCase {
     func testSendImmediately() async throws {
         let logger = LoggerA()
         let buffer = EventQueueMock()
-        let bundler = LoggerBundler(components: [logger], buffer: buffer, loggingStrategy: BufferedEventFlushStrategyMock())
+        let bundler = LoggerBundler(
+            components: [logger], buffer: buffer, bufferFlowController: BufferedEventFlushStrategyMock()
+        )
 
         var didSend = false
         logger._send = { _ in
@@ -36,7 +38,7 @@ class LoggerBundlerTests: XCTestCase {
         let bundler = LoggerBundler(
             components: [logger],
             buffer: buffer,
-            loggingStrategy: strategy
+            bufferFlowController: strategy
         )
 
         _ = await bundler.startLogging()
@@ -59,7 +61,7 @@ class LoggerBundlerTests: XCTestCase {
         let bundler = LoggerBundler(
             components: [loggerA, loggerB],
             buffer: buffer,
-            loggingStrategy: BufferedEventFlushStrategyMock()
+            bufferFlowController: BufferedEventFlushStrategyMock()
         )
 
         var didSendFromLoggerA = false

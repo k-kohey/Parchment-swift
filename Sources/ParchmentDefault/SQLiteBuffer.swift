@@ -9,7 +9,7 @@ import Parchment
 import SQLite
 import Foundation
 
-public final actor SQLiteBuffer: TrackingEventBuffer {
+public final actor SQLiteBuffer: LogBuffer {
     private enum Column {
         static let event = Expression<Data>("event")
         static let timestamp = Expression<Date>("timestamp")

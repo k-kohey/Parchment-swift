@@ -8,8 +8,8 @@ import Foundation
 
 public final actor LoggerBundler {
     private var components: [any LoggerComponent]
-    private let buffer: TrackingEventBuffer
-    private let flushStrategy: BufferedEventFlushScheduler
+    private let buffer: LogBuffer
+    private let bufferFlowController: BufferFlowController
 
     public var configMap: [LoggerComponentID: Configuration] = [:]
     private(set) var transform: Transform
@@ -18,13 +18,13 @@ public final actor LoggerBundler {
 
     public init(
         components: [any LoggerComponent],
-        buffer: some TrackingEventBuffer,
-        loggingStrategy: some BufferedEventFlushScheduler,
+        buffer: some LogBuffer,
+        bufferFlowController: some BufferFlowController,
         mutations: [Mutation] = []
     ) {
         self.components = components
         self.buffer = buffer
-        flushStrategy = loggingStrategy
+        self.bufferFlowController = bufferFlowController
         transform = mutations.composed()
     }
 
@@ -57,30 +57,18 @@ public final actor LoggerBundler {
                     event: transform(event, logger.id),
                     timestamp: .init()
                 )
+
                 group.addTask {
-                    await self.dispatch([payload], for: logger, with: option)
+                    switch option.policy {
+                    case .immediately:
+                        await self.upload([payload], with: logger)
+                    case .bufferingFirst:
+                        try? await self.bufferFlowController.input(
+                            [payload], with: self.buffer
+                        )
+                    }
                 }
             }
-        }
-    }
-
-    private func dispatch(
-        _ payloads: [Payload],
-        for logger: some LoggerComponent,
-        with option: LoggingOption
-    ) async {
-        switch option.policy {
-        case .immediately:
-            await upload(payloads, with: logger)
-        case .bufferingFirst:
-            guard configMap[logger.id]?.allowBuffering != .some(false) else {
-//                console()?.log("""
-//                ⚠ The logger(id=\(logger.id.value)) buffering has been skipped.
-//                BufferingFirst policy has been selected in options, but the logger does not allow buffering.
-//                """)
-                return
-            }
-            try? await buffer.save(payloads)
         }
     }
 
@@ -88,7 +76,9 @@ public final actor LoggerBundler {
         let isSucceeded = await logger.send(payloads)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
         if shouldBuffering {
-            try? await buffer.save(payloads)
+            try? await self.bufferFlowController.input(
+                payloads, with: self.buffer
+            )
         } else if !isSucceeded {
 //            console()?.log("""
 //            ⚠ The logger(id=\(logger.id.value)) failed to log an event.
@@ -101,7 +91,7 @@ public final actor LoggerBundler {
     public func startLogging() -> Task<Void, Error> {
         Task {
             try await withThrowingTaskGroup(of: Void.self) { group in
-                for try await payloads in await flushStrategy.schedule(with: buffer) {
+                for try await payloads in await bufferFlowController.output(with: buffer) {
                     group.addTask {
                         let payloadEachLogger = Dictionary(grouping: payloads) {
                             $0.destination
