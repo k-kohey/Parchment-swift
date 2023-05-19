@@ -10,7 +10,7 @@ struct MyLogger: LoggerComponent {
     static let id: LoggerComponentID = .my
 
     func send(_ log: [LoggerSendable]) async -> Bool {
-        print("send \(log)")
+        print("🚀 Send \(log.count) events\n \(log.reduce("", { $0 + "\($1)\n" }))")
         try? await Task.sleep(nanoseconds: 1000_000)
         return true
     }
@@ -21,8 +21,12 @@ extension TrackingEvent {
         TrackingEvent(eventName: "impletion", parameters: ["screen": screen])
     }
 
-    static var tap: Self {
-        .init(eventName: "tap", parameters: [:])
+    static var tapIncrement: Self {
+        .init(eventName: "tap increment", parameters: [:])
+    }
+
+    static var tapDecrement: Self {
+        .init(eventName: "tap decrement", parameters: [:])
     }
 }
 
@@ -33,13 +37,34 @@ let logger = LoggerBundler.make(
 
 @main
 struct ExampleAppApp: App {
+    @State @Tracked(name: "count", with: logger) var count: Int = 0
+    @State @Tracked(name: "text", with: logger, scope: \.description) var text = ""
+
     var body: some Scene {
         WindowGroup {
-            Button("send event") {
-                Task {
-                    await logger.send(event: .tap, with: .init(policy: .bufferingFirst))
-                }
+            VStack {
+                TextEditor(text: $text.erase())
+                    .lineLimit(nil)
+                Stepper(
+                    onIncrement: {
+                        count += 1
+                        Task {
+                            await logger.send(event: .tapIncrement)
+                        }
+                    },
+                    onDecrement: {
+                        count -= 1
+                        Task {
+                            await logger.send(event: .tapDecrement)
+                        }
+                    },
+                    label: {
+                        Text("\(count)")
+                    }
+                )
             }
+            .padding()
+            .background(Color.gray)
             .task {
                 await logger.startLogging()
                 await logger.send(event: .impletion("home"))

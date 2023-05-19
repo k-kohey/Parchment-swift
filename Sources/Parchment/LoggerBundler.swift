@@ -132,7 +132,7 @@ public extension LoggerBundler {
         let scope: LoggerScope?
 
         public init(
-            policy: LoggingPolicy = .immediately,
+            policy: LoggingPolicy = .bufferingFirst,
             scope: LoggerScope? = nil
         ) {
             self.policy = policy
