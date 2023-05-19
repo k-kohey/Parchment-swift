@@ -1,63 +1,119 @@
-import class Foundation.Bundle
 @testable import Parchment
 @testable import ParchmentDefault
 import XCTest
 
 final class SQLiteBufferTests: XCTestCase {
-    private var buffer: SQLiteBuffer!
-
-    @MainActor
-    override static func setUp() {
-        Configuration.debugMode = true
+    override func setUp() async throws {
+        try await SQLiteBuffer().clear()
     }
 
-    override func setUp() {
-        self.buffer = try! SQLiteBuffer()
-        Task {
-            await self.buffer.clear()
-        }
-    }
+    func testLoad() async throws {
+        let db = try SQLiteBuffer()
 
-    func testDequeue() async throws {
-        let record = BufferRecord(destination: "hoge", eventName: "a", parameters: [:], timestamp: .init(timeIntervalSince1970: 0))
-
-        await buffer.save([record])
-        let results = await buffer.load(limit: 1)
-        let count = await buffer.count()
-
-        XCTAssertEqual(results.first, record)
-        XCTAssertEqual(count, 0)
-    }
-
-    func testDequeue_whenMultipleRecordsWereInserted() async {
-        let records = makeRecords()
-
-        await buffer.save(records)
-
-        let results = await buffer.load()
-        let count = await buffer.count()
-
-        XCTAssertEqual(results, records)
-        XCTAssertEqual(count, 0)
-    }
-
-    func testCount() async {
-        let records = makeRecords()
-
-        await buffer.save(records)
-        let results = await buffer.count()
-
-        XCTAssertEqual(results, records.count)
-    }
-
-    private func makeRecords() -> [BufferRecord] {
-        (0 ..< 10).compactMap {
-            .init(
+        let records = [
+            BufferRecord(
                 destination: "hoge",
                 eventName: "a",
                 parameters: [:],
-                timestamp: .init(timeIntervalSince1970: TimeInterval($0))
+                timestamp: .init(timeIntervalSince1970: 0)
+            ),
+            BufferRecord(
+                destination: "fuga",
+                eventName: "b",
+                parameters: ["a": 0, "b": "c"],
+                timestamp: .init(timeIntervalSince1970: 0)
+            ),
+            BufferRecord(
+                destination: "foo",
+                eventName: "c",
+                parameters: ["a": 0, "b": "c"],
+                timestamp: .init(timeIntervalSince1970: 0)
             )
+        ]
+
+        try await db.save(records)
+        let results = try await db.load()
+
+        XCTAssertEqual(
+            results,
+            records
+        )
+    }
+
+    func testCount() async throws {
+        let db = try SQLiteBuffer()
+
+        let records = [
+            BufferRecord(
+                destination: "hoge",
+                eventName: "a",
+                parameters: [:],
+                timestamp: .init(timeIntervalSince1970: 0)
+            ),
+            BufferRecord(
+                destination: "fuga",
+                eventName: "b",
+                parameters: ["a": 0, "b": "c"],
+                timestamp: .init(timeIntervalSince1970: 0)
+            ),
+            BufferRecord(
+                destination: "foo",
+                eventName: "c",
+                parameters: ["a": 0, "b": "c"],
+                timestamp: .init(timeIntervalSince1970: 0)
+            )
+        ]
+
+        let initalState = try await db.count()
+        XCTAssertEqual(initalState, 0)
+
+        do {
+            try await db.save(records)
+            let result = try await db.count()
+            XCTAssertEqual(result, 3)
         }
+
+        do {
+            _ = try await db.load()
+            let result = try await db.count()
+            XCTAssertEqual(result, 0)
+        }
+    }
+
+    func testLoad_with_limit() async throws {
+        let db = try SQLiteBuffer()
+
+        let records = [
+            BufferRecord(
+                destination: "hoge",
+                eventName: "a",
+                parameters: [:],
+                timestamp: .init(timeIntervalSince1970: 2)
+            ),
+            BufferRecord(
+                destination: "fuga",
+                eventName: "b",
+                parameters: ["a": 0, "b": "c"],
+                timestamp: .init(timeIntervalSince1970: 1)
+            ),
+            BufferRecord(
+                destination: "foo",
+                eventName: "c",
+                parameters: ["a": 0, "b": "c"],
+                timestamp: .init(timeIntervalSince1970: 3)
+            )
+        ]
+
+        try await db.save(records)
+        let result = try await db.load(limit: 2)
+
+        let count = try await db.count()
+        XCTAssertEqual(count, 1)
+        XCTAssertEqual(
+            result,
+            result.sorted { lhs, rhs in
+                lhs.timestamp < rhs.timestamp
+            }
+        )
     }
 }

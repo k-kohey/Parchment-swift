@@ -18,6 +18,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.14.1")
     ],
     targets: [
         .target(
@@ -30,7 +31,10 @@ let package = Package(
         ),
         .target(
             name: "ParchmentDefault",
-            dependencies: [.target(name: "Parchment")],
+            dependencies: [
+                .target(name: "Parchment"),
+                .product(name: "SQLite", package: "SQLite.swift")
+            ],
             swiftSettings: [
                 .unsafeFlags([
                     "-strict-concurrency=complete"
