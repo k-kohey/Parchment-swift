@@ -32,7 +32,7 @@ final class LoggerB: LoggerComponent, @unchecked Sendable {
     }
 }
 
-final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
+final class EventQueueMock: LogBuffer, @unchecked Sendable {
     private var records: [Payload] = []
 
     func save(_ e: [Payload]) {
@@ -65,12 +65,16 @@ final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
     }
 }
 
-final class BufferedEventFlushStrategyMock: BufferedEventFlushScheduler, @unchecked Sendable {
-    private var buffer: TrackingEventBuffer?
+final class BufferedEventFlushStrategyMock: BufferFlowController, @unchecked Sendable {
+    private var buffer: LogBuffer?
 
     private var continuation: AsyncThrowingStream<[Payload], Error>.Continuation?
 
-    func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[Payload], Error> {
+    func input<T: LogBuffer>(_ payloads: [Payload], with buffer: T) async throws {
+        try await buffer.save(payloads)
+    }
+
+    func output<T: LogBuffer>(with buffer: T) async -> AsyncThrowingStream<[Payload], Error> {
         self.buffer = buffer
         return .init { continuation in
             self.continuation = continuation

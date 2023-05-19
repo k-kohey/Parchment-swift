@@ -12,7 +12,7 @@ private let loggerA = LoggerA()
 private var bundler = LoggerBundler(
     components: [loggerA],
     buffer: EventQueueMock(),
-    loggingStrategy: BufferedEventFlushStrategyMock()
+    bufferFlowController: BufferedEventFlushStrategyMock()
 )
 
 private struct State: Equatable {
