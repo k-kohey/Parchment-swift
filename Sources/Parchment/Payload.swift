@@ -1,5 +1,5 @@
 //
-//  BufferRecord.swift
+//  Payload.swift
 //
 //
 //  Created by k-kohey on 2021/10/08.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct BufferRecord: Loggable, LoggerSendable, Equatable {
+public struct Payload: Loggable, LoggerSendable, Equatable {
     public let id: String
     public let destination: String
     public let eventName: String
@@ -36,7 +36,7 @@ public struct BufferRecord: Loggable, LoggerSendable, Equatable {
         self.timestamp = timestamp
     }
 
-    public static func == (lhs: BufferRecord, rhs: BufferRecord) -> Bool {
+    public static func == (lhs: Payload, rhs: Payload) -> Bool {
         lhs.id == rhs.id
             && lhs.destination == rhs.destination
             && lhs.eventName == rhs.eventName
@@ -45,13 +45,13 @@ public struct BufferRecord: Loggable, LoggerSendable, Equatable {
     }
 }
 
-public extension BufferRecord {
+public extension Payload {
     var event: Loggable {
         TrackingEvent(eventName: eventName, parameters: parameters)
     }
 }
 
-extension BufferRecord: Encodable {
+extension Payload: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
@@ -126,7 +126,7 @@ extension BufferRecord: Encodable {
     }
 }
 
-extension BufferRecord: Decodable {
+extension Payload: Decodable {
     public init(from decoder: Decoder) throws {
         func decodeFromContainer(container: KeyedDecodingContainer<DynamicCodingKeys>) throws -> [String: Any] {
             var result = [String: Any]()

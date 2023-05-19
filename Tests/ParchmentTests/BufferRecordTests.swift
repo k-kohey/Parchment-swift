@@ -10,7 +10,7 @@ import XCTest
 
 class BufferRecordTests: XCTestCase {
     func testEcode() throws {
-        let originalRecord = BufferRecord(
+        let originalRecord = Payload(
                 id: "id1",
                 destination: "dest1",
                 eventName: "event1",
@@ -84,11 +84,11 @@ class BufferRecordTests: XCTestCase {
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        let result = try decoder.decode(BufferRecord.self, from: jsonString)
+        let result = try decoder.decode(Payload.self, from: jsonString)
 
         XCTAssertEqual(
             result,
-            BufferRecord(
+            Payload(
                     id: "id1",
                     destination: "dest1",
                     eventName: "event1",

@@ -52,26 +52,26 @@ public final actor LoggerBundler {
 
         await withTaskGroup(of: Void.self) { group in
             for logger in await loggers() {
-                let record = await BufferRecord(
+                let payload = await Payload(
                     destination: logger.id.value,
                     event: transform(event, logger.id),
                     timestamp: .init()
                 )
                 group.addTask {
-                    await self.dispatch([record], for: logger, with: option)
+                    await self.dispatch([payload], for: logger, with: option)
                 }
             }
         }
     }
 
     private func dispatch(
-        _ records: [BufferRecord],
+        _ payloads: [Payload],
         for logger: some LoggerComponent,
         with option: LoggingOption
     ) async {
         switch option.policy {
         case .immediately:
-            await upload(records, with: logger)
+            await upload(payloads, with: logger)
         case .bufferingFirst:
             guard configMap[logger.id]?.allowBuffering != .some(false) else {
 //                console()?.log("""
@@ -80,15 +80,15 @@ public final actor LoggerBundler {
 //                """)
                 return
             }
-            try? await buffer.save(records)
+            try? await buffer.save(payloads)
         }
     }
 
-    private func upload(_ records: [BufferRecord], with logger: any LoggerComponent) async {
-        let isSucceeded = await logger.send(records)
+    private func upload(_ payloads: [Payload], with logger: any LoggerComponent) async {
+        let isSucceeded = await logger.send(payloads)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
         if shouldBuffering {
-            try? await buffer.save(records)
+            try? await buffer.save(payloads)
         } else if !isSucceeded {
 //            console()?.log("""
 //            ⚠ The logger(id=\(logger.id.value)) failed to log an event.
@@ -101,13 +101,13 @@ public final actor LoggerBundler {
     public func startLogging() -> Task<Void, Error> {
         Task {
             try await withThrowingTaskGroup(of: Void.self) { group in
-                for try await records in await flushStrategy.schedule(with: buffer) {
+                for try await payloads in await flushStrategy.schedule(with: buffer) {
                     group.addTask {
-                        let recordEachLogger = Dictionary(grouping: records) { record in
-                            record.destination
+                        let payloadEachLogger = Dictionary(grouping: payloads) {
+                            $0.destination
                         }
-                        for (destination, records) in recordEachLogger {
-                            await self.upload(records, with: self.components[.init(destination)])
+                        for (destination, payloads) in payloadEachLogger {
+                            await self.upload(payloads, with: self.components[.init(destination)])
                         }
                     }
                 }

@@ -11,13 +11,13 @@ import Foundation
 import XCTest
 
 final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
-    private var records: [BufferRecord] = []
+    private var records: [Payload] = []
 
-    func save(_ e: [BufferRecord]) {
+    func save(_ e: [Payload]) {
         records += e
     }
 
-    func load(limit: Int?) async throws -> [Parchment.BufferRecord] {
+    func load(limit: Int?) async throws -> [Parchment.Payload] {
         let count: Int
         if let limit {
             count = limit
@@ -33,7 +33,7 @@ final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
         records.count
     }
 
-    private func dequeue() -> BufferRecord? {
+    private func dequeue() -> Payload? {
         defer {
             if !records.isEmpty {
                 records.removeFirst()

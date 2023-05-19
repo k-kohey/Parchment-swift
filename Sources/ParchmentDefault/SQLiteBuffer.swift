@@ -41,7 +41,7 @@ public final actor SQLiteBuffer: TrackingEventBuffer {
         )
     }
 
-    public func save(_ e: [BufferRecord]) throws {
+    public func save(_ e: [Payload]) throws {
         try db.run(
             try events.insertMany(
                 e.map {
@@ -54,14 +54,14 @@ public final actor SQLiteBuffer: TrackingEventBuffer {
         )
     }
 
-    public func load(limit: Int?) throws -> [BufferRecord] {
+    public func load(limit: Int?) throws -> [Payload] {
         let target = events.order(Column.timestamp).limit(limit)
         let entities = try db.prepare(target)
             .map { $0[Column.event] }
             .joined(separator: ",".data(using: .utf8)!)
         let jsonData = "[".data(using: .utf8)! + entities + "]".data(using: .utf8)!
 
-        let result = try decoder.decode([BufferRecord].self, from: jsonData)
+        let result = try decoder.decode([Payload].self, from: jsonData)
 
         if limit != nil {
             // Cannot Delete if limit is not specified

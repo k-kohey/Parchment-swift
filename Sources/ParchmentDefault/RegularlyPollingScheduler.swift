@@ -20,12 +20,12 @@ public struct RegularlyPollingScheduler: BufferedEventFlushScheduler, Sendable {
         self.limitOnNumberOfEvent = limitOnNumberOfEvent
     }
 
-    public func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[BufferRecord], Error> {
+    public func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[Payload], Error> {
         AsyncThrowingStream { continuation in
             Task {
                 while !Task.isCancelled {
-                    let records = try? await buffer.load()
-                    continuation.yield(records ?? [])
+                    let payloads = try? await buffer.load()
+                    continuation.yield(payloads ?? [])
                     do {
                         try await Task.sleep(nanoseconds: UInt64(timeInterval) * 1000_000_000)
                     } catch {
@@ -39,8 +39,8 @@ public struct RegularlyPollingScheduler: BufferedEventFlushScheduler, Sendable {
                 while !Task.isCancelled {
                     let count = try? await buffer.count()
                     if limitOnNumberOfEvent < (count ?? 0) {
-                        let records = try? await buffer.load()
-                        continuation.yield(records ?? [])
+                        let payloads = try? await buffer.load()
+                        continuation.yield(payloads ?? [])
                     }
                     do {
                         try await Task.sleep(nanoseconds: 1000_000_000)

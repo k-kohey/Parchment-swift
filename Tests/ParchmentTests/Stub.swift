@@ -33,13 +33,13 @@ final class LoggerB: LoggerComponent, @unchecked Sendable {
 }
 
 final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
-    private var records: [BufferRecord] = []
+    private var records: [Payload] = []
 
-    func save(_ e: [BufferRecord]) {
+    func save(_ e: [Payload]) {
         records += e
     }
 
-    func load(limit: Int?) async throws -> [Parchment.BufferRecord] {
+    func load(limit: Int?) async throws -> [Parchment.Payload] {
         let count: Int
         if let limit {
             count = limit
@@ -55,7 +55,7 @@ final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
         records.count
     }
 
-    private func dequeue() -> BufferRecord? {
+    private func dequeue() -> Payload? {
         defer {
             if !records.isEmpty {
                 records.removeFirst()
@@ -68,9 +68,9 @@ final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
 final class BufferedEventFlushStrategyMock: BufferedEventFlushScheduler, @unchecked Sendable {
     private var buffer: TrackingEventBuffer?
 
-    private var continuation: AsyncThrowingStream<[BufferRecord], Error>.Continuation?
+    private var continuation: AsyncThrowingStream<[Payload], Error>.Continuation?
 
-    func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[BufferRecord], Error> {
+    func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[Payload], Error> {
         self.buffer = buffer
         return .init { continuation in
             self.continuation = continuation
