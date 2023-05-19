@@ -91,8 +91,7 @@ extension BufferRecord: Encodable {
                 var nestedContainer = container.nestedContainer(keyedBy: DynamicCodingKeys.self, forKey: codingKey)
                 try encodeToContainer(value: dictionaryValue, container: &nestedContainer)
             default:
-                let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "Unsupported value!")
-                throw EncodingError.invalidValue(value, context)
+                try container.encodeNil(forKey: codingKey)
             }
         }
     }
@@ -122,8 +121,7 @@ extension BufferRecord: Encodable {
             var nestedContainer = container.nestedContainer(keyedBy: DynamicCodingKeys.self)
             try encodeToContainer(value: dictionaryValue, container: &nestedContainer)
         default:
-            let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "Unsupported value!")
-            throw EncodingError.invalidValue(value, context)
+            try container.encodeNil()
         }
     }
 }
