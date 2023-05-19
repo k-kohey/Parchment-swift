@@ -80,7 +80,7 @@ public final actor LoggerBundler {
 //                """)
                 return
             }
-            await buffer.save(records)
+            try? await buffer.save(records)
         }
     }
 
@@ -88,7 +88,7 @@ public final actor LoggerBundler {
         let isSucceeded = await logger.send(records)
         let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
         if shouldBuffering {
-            await buffer.save(records)
+            try? await buffer.save(records)
         } else if !isSucceeded {
 //            console()?.log("""
 //            ⚠ The logger(id=\(logger.id.value)) failed to log an event.

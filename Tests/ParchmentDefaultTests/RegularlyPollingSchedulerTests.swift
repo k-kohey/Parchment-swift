@@ -17,8 +17,13 @@ final class EventQueueMock: TrackingEventBuffer, @unchecked Sendable {
         records += e
     }
 
-    func load(limit: Int64) -> [BufferRecord] {
-        let count = limit > 0 ? Int(limit) : records.count
+    func load(limit: Int?) async throws -> [Parchment.BufferRecord] {
+        let count: Int
+        if let limit {
+            count = limit
+        } else {
+            count = records.count
+        }
         return (0 ..< min(count, records.count)).reduce([]) { result, _ in
             result + [dequeue()].compactMap { $0 }
         }

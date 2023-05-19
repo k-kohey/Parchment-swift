@@ -24,8 +24,8 @@ public struct RegularlyPollingScheduler: BufferedEventFlushScheduler, Sendable {
         AsyncThrowingStream { continuation in
             Task {
                 while !Task.isCancelled {
-                    let records = await buffer.load()
-                    continuation.yield(records)
+                    let records = try? await buffer.load()
+                    continuation.yield(records ?? [])
                     do {
                         try await Task.sleep(nanoseconds: UInt64(timeInterval) * 1000_000_000)
                     } catch {
@@ -37,10 +37,10 @@ public struct RegularlyPollingScheduler: BufferedEventFlushScheduler, Sendable {
 
             Task {
                 while !Task.isCancelled {
-                    let count = await buffer.count()
-                    if limitOnNumberOfEvent < count {
-                        let records = await buffer.load()
-                        continuation.yield(records)
+                    let count = try? await buffer.count()
+                    if limitOnNumberOfEvent < (count ?? 0) {
+                        let records = try? await buffer.load()
+                        continuation.yield(records ?? [])
                     }
                     do {
                         try await Task.sleep(nanoseconds: 1000_000_000)
