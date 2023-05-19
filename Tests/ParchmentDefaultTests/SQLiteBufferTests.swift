@@ -11,19 +11,19 @@ final class SQLiteBufferTests: XCTestCase {
         let db = try SQLiteBuffer()
 
         let records = [
-            BufferRecord(
+            Payload(
                 destination: "hoge",
                 eventName: "a",
                 parameters: [:],
                 timestamp: .init(timeIntervalSince1970: 0)
             ),
-            BufferRecord(
+            Payload(
                 destination: "fuga",
                 eventName: "b",
                 parameters: ["a": 0, "b": "c"],
                 timestamp: .init(timeIntervalSince1970: 0)
             ),
-            BufferRecord(
+            Payload(
                 destination: "foo",
                 eventName: "c",
                 parameters: ["a": 0, "b": "c"],
@@ -44,19 +44,19 @@ final class SQLiteBufferTests: XCTestCase {
         let db = try SQLiteBuffer()
 
         let records = [
-            BufferRecord(
+            Payload(
                 destination: "hoge",
                 eventName: "a",
                 parameters: [:],
                 timestamp: .init(timeIntervalSince1970: 0)
             ),
-            BufferRecord(
+            Payload(
                 destination: "fuga",
                 eventName: "b",
                 parameters: ["a": 0, "b": "c"],
                 timestamp: .init(timeIntervalSince1970: 0)
             ),
-            BufferRecord(
+            Payload(
                 destination: "foo",
                 eventName: "c",
                 parameters: ["a": 0, "b": "c"],
@@ -84,19 +84,19 @@ final class SQLiteBufferTests: XCTestCase {
         let db = try SQLiteBuffer()
 
         let records = [
-            BufferRecord(
+            Payload(
                 destination: "hoge",
                 eventName: "a",
                 parameters: [:],
                 timestamp: .init(timeIntervalSince1970: 2)
             ),
-            BufferRecord(
+            Payload(
                 destination: "fuga",
                 eventName: "b",
                 parameters: ["a": 0, "b": "c"],
                 timestamp: .init(timeIntervalSince1970: 1)
             ),
-            BufferRecord(
+            Payload(
                 destination: "foo",
                 eventName: "c",
                 parameters: ["a": 0, "b": "c"],

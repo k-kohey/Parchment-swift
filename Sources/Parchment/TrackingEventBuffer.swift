@@ -8,13 +8,13 @@
 import Foundation
 
 public protocol TrackingEventBuffer: Sendable {
-    func save(_ event: [BufferRecord]) async throws
-    func load(limit: Int?) async throws -> [BufferRecord]
+    func save(_ event: [Payload]) async throws
+    func load(limit: Int?) async throws -> [Payload]
     func count() async throws -> Int
 }
 
 public extension TrackingEventBuffer {
-    func load() async throws -> [BufferRecord] {
+    func load() async throws -> [Payload] {
         try await load(limit: nil)
     }
 }

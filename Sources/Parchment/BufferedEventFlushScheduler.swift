@@ -7,5 +7,5 @@
 import Foundation
 
 public protocol BufferedEventFlushScheduler: Sendable {
-    func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[BufferRecord], Error>
+    func schedule(with buffer: TrackingEventBuffer) async -> AsyncThrowingStream<[Payload], Error>
 }
