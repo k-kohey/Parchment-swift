@@ -72,6 +72,8 @@ class RegularlyPollingSchedulerTests: XCTestCase {
             ), count: 3),
             with: buffer
         )
+
+        await Task.yield()
         XCTAssertEqual(buffer.count(), 4)
     }
 

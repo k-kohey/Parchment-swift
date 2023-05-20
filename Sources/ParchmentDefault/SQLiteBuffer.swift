@@ -5,7 +5,7 @@
 //  Created by k-kohey on 2021/10/27.
 //
 
-import Parchment
+@_spi(Parchment) import Parchment
 import SQLite
 import Foundation
 
@@ -51,6 +51,10 @@ public final actor SQLiteBuffer: LogBuffer {
                     ]
                 }
             )
+        )
+
+        osLogger.debug(
+            "🎁 Buffer \(e.count) events\n\(e.reduce("", { $0 + "\($1)\n" }))"
         )
     }
 

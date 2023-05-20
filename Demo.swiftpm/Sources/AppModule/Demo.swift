@@ -10,7 +10,6 @@ struct MyLogger: LoggerComponent {
     static let id: LoggerComponentID = .my
 
     func send(_ log: [LoggerSendable]) async -> Bool {
-        print("🚀 Send \(log.count) events\n \(log.reduce("", { $0 + "\($1)\n" }))")
         try? await Task.sleep(nanoseconds: 1000_000)
         return true
     }
@@ -31,13 +30,13 @@ extension TrackingEvent {
 }
 
 let logger = LoggerBundler.make(
-    components: [MyLogger()],
-    bufferFlowController: DefaultBufferFlowController(pollingInterval: 5)
+    components: [MyLogger(), DebugLogger()],
+    bufferFlowController: DefaultBufferFlowController(pollingInterval: 5, delayInputLimit: 5)
 )
 
 @main
 struct ExampleAppApp: App {
-    @State @Tracked(name: "count", with: logger) var count: Int = 0
+    @State var count: Int = 0
     @State @Tracked(name: "text", with: logger, scope: \.description) var text = ""
 
     var body: some Scene {
