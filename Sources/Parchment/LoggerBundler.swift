@@ -63,9 +63,13 @@ public final actor LoggerBundler {
                     case .immediately:
                         await self.upload([payload], with: logger)
                     case .bufferingFirst:
-                        try? await self.bufferFlowController.input(
-                            [payload], with: self.buffer
-                        )
+                        do {
+                            try await self.bufferFlowController.input(
+                                [payload], with: self.buffer
+                            )
+                        } catch {
+                            osLogger.error("The following error occurred when saving Log to Buffer\n\(error)")
+                        }
                     }
                 }
             }
@@ -74,33 +78,37 @@ public final actor LoggerBundler {
 
     private func upload(_ payloads: [Payload], with logger: any LoggerComponent) async {
         let isSucceeded = await logger.send(payloads)
-        let shouldBuffering = !isSucceeded && (configMap[logger.id]?.allowBuffering != .some(false))
+        let shouldBuffering = !isSucceeded
         if shouldBuffering {
-            try? await self.bufferFlowController.input(
-                payloads, with: self.buffer
-            )
-        } else if !isSucceeded {
-//            console()?.log("""
-//            ⚠ The logger(id=\(logger.id.value)) failed to log an event.
-//            However, buffering is skiped because it is not allowed in the configuration.
-//            """)
+            do {
+                try await self.bufferFlowController.input(
+                    payloads, with: self.buffer
+                )
+            } catch {
+                osLogger.error("The following error occurred when saving Log to Buffer\n\(error)")
+            }
         }
     }
 
     @discardableResult
     public func startLogging() -> Task<Void, Error> {
         Task {
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                for try await payloads in await bufferFlowController.output(with: buffer) {
-                    group.addTask {
-                        let payloadEachLogger = Dictionary(grouping: payloads) {
-                            $0.destination
-                        }
-                        for (destination, payloads) in payloadEachLogger {
-                            await self.upload(payloads, with: self.components[.init(destination)])
+            do {
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    for try await payloads in await bufferFlowController.output(with: buffer) {
+                        group.addTask {
+                            let payloadEachLogger = Dictionary(grouping: payloads) {
+                                $0.destination
+                            }
+                            for (destination, payloads) in payloadEachLogger {
+                                await self.upload(payloads, with: self.components[.init(destination)])
+                            }
                         }
                     }
                 }
+            } catch {
+                osLogger.error("The following error occurred when polling Log to Buffer\n\(error)")
+                throw error
             }
         }
     }

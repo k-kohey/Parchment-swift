@@ -13,7 +13,8 @@ public final class DefaultBufferFlowController: BufferFlowController, Sendable {
     let maxBufferSize: Int
     let inputAccumulationLimit: Int
     let delayInputLimit: TimeInterval
-    private var inputAccumulationPayloads: [Payload] = []
+
+    @MainActor private var inputAccumulationPayloads: [Payload] = []
 
     private var bufferTask: Task<Void, Error>? = nil
 
@@ -32,24 +33,27 @@ public final class DefaultBufferFlowController: BufferFlowController, Sendable {
     public func input<T: LogBuffer>(
         _ events: [Payload], with buffer: T
     ) async throws {
-        @Sendable func save() async throws {
+        @Sendable @MainActor func save() async throws {
             try await buffer.save(inputAccumulationPayloads)
             inputAccumulationPayloads = []
         }
 
         bufferTask?.cancel()
-        inputAccumulationPayloads += events
-
-        if inputAccumulationLimit < inputAccumulationPayloads.count {
-            try await save()
-        } else {
-            bufferTask = Task {
-                if Task.isCancelled {
-                    return
-                }
-
-                try await Task.sleep(nanoseconds: UInt64(delayInputLimit) * 1000_000_000)
+        Task { @MainActor in
+            inputAccumulationPayloads += events
+            if inputAccumulationLimit < inputAccumulationPayloads.count {
                 try await save()
+            }
+            else {
+                bufferTask = Task {
+                    try await Task.sleep(nanoseconds: UInt64(delayInputLimit) * 1000_000_000)
+
+                    if Task.isCancelled {
+                        return
+                    }
+
+                    try await save()
+                }
             }
         }
     }
