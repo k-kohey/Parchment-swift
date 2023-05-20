@@ -29,6 +29,24 @@ extension TrackingEvent {
     }
 }
 
+struct TimestampMutation: Mutation {
+    func transform(_ e: Parchment.Loggable, id: Parchment.LoggerComponentID) -> Parchment.AnyLoggable {
+        var e = AnyLoggable(e)
+        e.parameters["createdAt"] = Date()
+        return e
+    }
+}
+
+struct UserIDMutation: Mutation {
+    let userID = 1
+
+    func transform(_ e: Parchment.Loggable, id: Parchment.LoggerComponentID) -> Parchment.AnyLoggable {
+        var e = AnyLoggable(e)
+        e.parameters["userID"] = userID
+        return e
+    }
+}
+
 let logger = LoggerBundler.make(
     components: [MyLogger(), DebugLogger()],
     bufferFlowController: DefaultBufferFlowController(pollingInterval: 5, delayInputLimit: 5)
@@ -66,6 +84,11 @@ struct ExampleAppApp: App {
             .background(Color.gray)
             .task {
                 await logger.startLogging()
+
+                await logger.add(
+                    mutations: [TimestampMutation(), UserIDMutation()]
+                )
+
                 await logger.send(event: .impletion("home"))
             }
         }

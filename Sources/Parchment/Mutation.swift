@@ -28,21 +28,30 @@ public struct AnyLoggable: Loggable {
     }
 }
 
-typealias Transform = (Loggable, LoggerComponentID) -> AnyLoggable
+typealias Transform = @Sendable (Loggable, LoggerComponentID) -> AnyLoggable
 
 public protocol Mutation: Sendable {
     func transform(_: any Loggable, id: LoggerComponentID) -> AnyLoggable
 }
 
+private extension Mutation {
+    var _transform: Transform {
+        {
+            self.transform($0, id: $1)
+        }
+    }
+}
+
 extension Sequence where Element == Mutation {
     func composed() -> Transform {
-        map { $0.transform }.composed()
+        return map { $0._transform }.composed()
     }
 }
 
 extension Sequence where Element == Transform {
     func composed() -> Transform {
-        reduce({ log, _ in AnyLoggable(log) }) { partialResult, transform in
+        let base: Transform = { log, _ in AnyLoggable(log) }
+        return reduce(base) { partialResult, transform in
             {
                 transform(partialResult($0, $1), $1)
             }
