@@ -91,6 +91,10 @@ struct ExampleAppApp: App {
 
                 await logger.send(event: .impletion("home"))
             }
+            .track(
+                screen: "Top",
+                with: logger
+            )
         }
     }
 }
