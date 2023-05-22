@@ -33,7 +33,7 @@ public final actor LoggerBundler {
     }
 
     public func add(mutations: [Mutation]) {
-        transform = ([transform, mutations.composed()]).composed()
+        transform = [transform, mutations.composed()].composed()
     }
 
     /// Sends a Log to the retained LoggerComponents.
