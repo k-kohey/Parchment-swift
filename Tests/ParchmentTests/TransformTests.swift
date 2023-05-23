@@ -20,7 +20,7 @@ private struct MutationMock: Mutation {
 }
 
 final class TransformTests: XCTestCase {
-    func testComposed() {
+    func testComposed() async {
         let mutationA = MutationMock { l, id in
             AnyLoggable(
                 eventName: l.eventName,
@@ -40,7 +40,7 @@ final class TransformTests: XCTestCase {
 
 
         let mutations: [any Mutation] = [mutationA, mutationB]
-        let r = mutations.composed()(TrackingEvent(eventName: "", parameters: ["foo": 2]), .init(""))
+        let r = await mutations.composed()(TrackingEvent(eventName: "", parameters: ["foo": 2]), .init(""))
 
         XCTAssertEqual(
             r.parameters as NSDictionary,
