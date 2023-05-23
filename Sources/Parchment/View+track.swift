@@ -12,7 +12,7 @@ public struct ImpletionEvent: Loggable {
     public var parameters: [String : Sendable]
 }
 
-private struct Modifier: ViewModifier {
+private struct Impletion: ViewModifier {
     let screenName: String
     let logger: LoggerBundler
     let option: LoggerBundler.LoggingOption?
@@ -42,7 +42,7 @@ public extension View {
         option: LoggerBundler.LoggingOption? = nil
     ) -> some View {
         modifier(
-            Modifier(
+            Impletion(
                 screenName: name,
                 logger: logger,
                 option: option
