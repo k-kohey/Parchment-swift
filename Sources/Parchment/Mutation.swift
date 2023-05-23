@@ -7,30 +7,10 @@
 
 import Foundation
 
-public struct AnyLoggable: Loggable {
-    public var eventName: String
-    public var parameters: [String : Sendable]
-
-    public let base: (any Loggable)?
-
-    public init(_ base: any Loggable) {
-        self.base = base
-        self.eventName = base.eventName
-        self.parameters = base.parameters
-    }
-
-    public init(
-        eventName: String, parameters: [String : Sendable]
-    ) {
-        self.base = nil
-        self.eventName = eventName
-        self.parameters = parameters
-    }
-}
-
-typealias Transform = @Sendable (Loggable, LoggerComponentID) -> AnyLoggable
+typealias Transform = @Sendable @AnyLoggableActor (Loggable, LoggerComponentID) -> AnyLoggable
 
 public protocol Mutation: Sendable {
+    @AnyLoggableActor 
     func transform(_: any Loggable, id: LoggerComponentID) -> AnyLoggable
 }
 
