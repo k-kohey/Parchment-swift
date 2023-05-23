@@ -16,10 +16,6 @@ struct MyLogger: LoggerComponent {
 }
 
 extension TrackingEvent {
-    static func impletion(_ screen: String) -> Self {
-        TrackingEvent(eventName: "impletion", parameters: ["screen": screen])
-    }
-
     static var tapIncrement: Self {
         .init(eventName: "tap increment", parameters: [:])
     }
@@ -30,7 +26,7 @@ extension TrackingEvent {
 }
 
 struct TimestampMutation: Mutation {
-    func transform(_ e: Parchment.Loggable, id: Parchment.LoggerComponentID) -> Parchment.AnyLoggable {
+    func transform(_ e: Loggable, id: LoggerComponentID) -> AnyLoggable {
         var e = AnyLoggable(e)
         e.parameters["createdAt"] = Date()
         return e
@@ -40,16 +36,34 @@ struct TimestampMutation: Mutation {
 struct UserIDMutation: Mutation {
     let userID = 1
 
-    func transform(_ e: Parchment.Loggable, id: Parchment.LoggerComponentID) -> Parchment.AnyLoggable {
+    func transform(_ e: Loggable, id: LoggerComponentID) -> AnyLoggable {
         var e = AnyLoggable(e)
         e.parameters["userID"] = userID
         return e
     }
 }
 
+struct ImpletionMutation: Mutation {
+    func transform(_ e: Loggable, id: LoggerComponentID) -> AnyLoggable {
+        var e = AnyLoggable(e)
+        if e.isBased(ImpletionEvent.self) {
+            e.eventName = (e.parameters["screen"] as! String) + "ScreenEvent"
+            e.parameters = ["event": "onAppear"]
+        }
+        return e
+    }
+}
+
 let logger = LoggerBundler.make(
     components: [MyLogger(), DebugLogger()],
-    bufferFlowController: DefaultBufferFlowController(pollingInterval: 5, delayInputLimit: 5)
+    bufferFlowController: DefaultBufferFlowController(
+        pollingInterval: 5, delayInputLimit: 5
+    ),
+    mutations: [
+        TimestampMutation(),
+        ImpletionMutation(),
+        UserIDMutation()
+    ]
 )
 
 @main
@@ -84,16 +98,11 @@ struct ExampleAppApp: App {
             .background(Color.gray)
             .task {
                 await logger.startLogging()
-
-                await logger.add(
-                    mutations: [TimestampMutation(), UserIDMutation()]
-                )
-
-                await logger.send(event: .impletion("home"))
             }
             .track(
                 screen: "Top",
-                with: logger
+                with: logger,
+                option: .init(policy: .immediately)
             )
         }
     }
