@@ -42,6 +42,9 @@ public struct AnyLoggable: Loggable {
             return true
         }
         let result = find(T.self, from: self)
+        if findCache[id] == nil {
+            findCache[id] = [:]
+        }
         findCache[id]?["\(T.self)"] = result
         return result
     }
