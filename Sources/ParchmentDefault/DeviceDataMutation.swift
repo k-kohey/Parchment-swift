@@ -5,28 +5,24 @@
 //  Created by k-kohey on 2021/12/29.
 //
 
-#if canImport(UIKit)
+import Parchment
+import UIKit
 
-    import Parchment
-    import UIKit
+public struct DeviceDataMutation: Mutation {
+    private let deviceParams: [String: Sendable]
 
-    public struct DeviceDataMutation: Mutation {
-        private let deviceParams: [String: Sendable]
-
-        @MainActor
-        public init(device: UIDevice) {
-            deviceParams = [
-                "Model": device.name,
-                "OS": device.systemName,
-                "OS Version": device.systemVersion
-            ]
-        }
-
-        public func transform(_ event: any Loggable, id _: LoggerComponentID) -> AnyLoggable {
-            var event = AnyLoggable(event)
-            event.parameters = event.parameters.merging(deviceParams) { left, _ in left }
-            return event
-        }
+    @MainActor
+    public init(device: UIDevice) {
+        deviceParams = [
+            "Model": device.name,
+            "OS": device.systemName,
+            "OS Version": device.systemVersion
+        ]
     }
 
-#endif
+    public func transform(_ event: any Loggable, id _: LoggerComponentID) -> AnyLoggable {
+        var event = AnyLoggable(event)
+        event.parameters = event.parameters.merging(deviceParams) { left, _ in left }
+        return event
+    }
+}

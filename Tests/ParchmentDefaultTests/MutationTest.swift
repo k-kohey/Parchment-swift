@@ -28,15 +28,14 @@ private enum Event: Loggable {
 }
 
 class MutationTests: XCTestCase {
-#if canImport(UIKit)
-    // 的確なテストに直す
     @MainActor func testTransform() async throws {
         let event = Event.hoge
         let mutation: [Mutation] = [DeviceDataMutation(device: .current)]
 
         let newEvent = await mutation.composed()(event, .init("hoge"))
 
+
+
         XCTAssertTrue(newEvent.parameters.count > 1)
     }
-#endif
 }
