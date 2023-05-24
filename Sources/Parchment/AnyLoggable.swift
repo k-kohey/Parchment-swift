@@ -36,6 +36,10 @@ public struct AnyLoggable: Loggable {
         self.parameters = parameters
     }
 
+    /// Recursively searches for the instance  `base` used to initialize this type and checks
+    /// for the existence of an instance of the type passed as an argument.
+    ///
+    /// This is useful for checking for lost type information, since type information is lost in conversions using `Parchment.Mutation`.
     @AnyLoggableActor
     public func isBased<T: Loggable>(_ type: T.Type) -> Bool {
         if findCache[id]?["\(T.self)"] == true {

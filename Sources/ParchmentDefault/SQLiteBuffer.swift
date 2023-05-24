@@ -41,7 +41,7 @@ public final actor SQLiteBuffer: LogBuffer {
         )
     }
 
-    public func save(_ e: [Payload]) throws {
+    public func enqueue(_ e: [Payload]) throws {
         try db.run(
             try events.insertMany(
                 e.map {
@@ -58,7 +58,7 @@ public final actor SQLiteBuffer: LogBuffer {
         )
     }
 
-    public func load(limit: Int?) throws -> [Payload] {
+    public func dequeue(limit: Int?) throws -> [Payload] {
         let target = events.order(Column.timestamp).limit(limit)
         let entities = try db.prepare(target)
             .map { $0[Column.event] }

@@ -35,11 +35,11 @@ final class LoggerB: LoggerComponent, @unchecked Sendable {
 final class EventQueueMock: LogBuffer, @unchecked Sendable {
     private var records: [Payload] = []
 
-    func save(_ e: [Payload]) {
+    func enqueue(_ e: [Payload]) {
         records += e
     }
 
-    func load(limit: Int?) async throws -> [Parchment.Payload] {
+    func dequeue(limit: Int?) async throws -> [Parchment.Payload] {
         let count: Int
         if let limit {
             count = limit
@@ -71,7 +71,7 @@ final class BufferedEventFlushStrategyMock: BufferFlowController, @unchecked Sen
     private var continuation: AsyncThrowingStream<[Payload], Error>.Continuation?
 
     func input<T: LogBuffer>(_ payloads: [Payload], with buffer: T) async throws {
-        try await buffer.save(payloads)
+        try await buffer.enqueue(payloads)
     }
 
     func output<T: LogBuffer>(with buffer: T) async -> AsyncThrowingStream<[Payload], Error> {

@@ -11,16 +11,13 @@ public final actor LoggerBundler {
     private let buffer: LogBuffer
     private let bufferFlowController: BufferFlowController
 
-    public var configMap: [LoggerComponentID: Configuration] = [:]
     private(set) var transform: Transform
-
-    private var loggingTask: Task<Void, Never>?
 
     public init(
         components: [any LoggerComponent],
         buffer: some LogBuffer,
         bufferFlowController: some BufferFlowController,
-        mutations: [Mutation] = []
+        mutations: [any Mutation] = []
     ) {
         self.components = components
         self.buffer = buffer
@@ -33,7 +30,9 @@ public final actor LoggerBundler {
     }
 
     public func add(mutations: [Mutation]) {
-        transform = [transform, mutations.composed()].composed()
+        transform = [
+            transform, mutations.composed()
+        ].composed()
     }
 
     /// Sends a Log to the retained LoggerComponents.
@@ -90,6 +89,8 @@ public final actor LoggerBundler {
         }
     }
 
+    /// Dequeue Log from Buffer and start sending Log to LoggerComponent.
+    /// The number and timing of Log dequeues are determined by BufferFlowController.
     @discardableResult
     public func startLogging() -> Task<Void, Error> {
         Task {
@@ -115,16 +116,34 @@ public final actor LoggerBundler {
 }
 
 public extension LoggerBundler {
+    /// Log sending timing
     enum LoggingPolicy: Sendable {
+        /// requires the log o be sent to LoggerComponent immediately without storing it in the buffer.
+        /// When this is specified, logs can be sent ignoring the waiting order of buffer.
         case immediately
         case bufferingFirst
     }
 
+    /// Scope of sending logs
+    ///
+    /// If specified as follows, Logs are sent only to the LoggerComponent
+    /// whose LoggerComponentID is defined as myLogger.
+    ///
+    ///      extension LoggerComponentID {
+    ///         static var myLogger: LoggerComponentID = { .init("myLogger") }
+    ///      }
+    ///
+    ///      await logger.send(
+    ///         event,
+    ///         with: .init(scope: .only(.myLogger))
+    ///      )
     enum LoggerScope: Sendable {
         case only([LoggerComponentID])
         case exclude([LoggerComponentID])
     }
 
+    ///  Settings on how logs are sent
+    ///  The default settings sends logs to all LoggerComponents after first storing them in a buffer
     struct LoggingOption: Sendable {
         let policy: LoggingPolicy
         let scope: LoggerScope?
@@ -135,16 +154,6 @@ public extension LoggerBundler {
         ) {
             self.policy = policy
             self.scope = scope
-        }
-    }
-}
-
-public extension LoggerBundler {
-    struct Configuration {
-        let allowBuffering: Bool
-
-        public init(allowBuffering: Bool) {
-            self.allowBuffering = allowBuffering
         }
     }
 }

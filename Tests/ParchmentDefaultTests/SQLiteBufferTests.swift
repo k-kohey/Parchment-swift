@@ -31,7 +31,7 @@ final class SQLiteBufferTests: XCTestCase {
             )
         ]
 
-        try await db.save(records)
+        try await db.enqueue(records)
         let results = try await db.load()
 
         XCTAssertEqual(
@@ -68,7 +68,7 @@ final class SQLiteBufferTests: XCTestCase {
         XCTAssertEqual(initalState, 0)
 
         do {
-            try await db.save(records)
+            try await db.enqueue(records)
             let result = try await db.count()
             XCTAssertEqual(result, 3)
         }
@@ -104,8 +104,8 @@ final class SQLiteBufferTests: XCTestCase {
             )
         ]
 
-        try await db.save(records)
-        let result = try await db.load(limit: 2)
+        try await db.enqueue(records)
+        let result = try await db.dequeue(limit: 2)
 
         let count = try await db.count()
         XCTAssertEqual(count, 1)
