@@ -11,7 +11,7 @@ public final actor LoggerBundler {
     private let buffer: LogBuffer
     private let bufferFlowController: BufferFlowController
 
-    private(set) var transform: Transform
+    private var mutations: [any Mutation] = []
 
     public init(
         components: [any LoggerComponent],
@@ -22,7 +22,7 @@ public final actor LoggerBundler {
         self.components = components
         self.buffer = buffer
         self.bufferFlowController = bufferFlowController
-        transform = mutations.composed()
+        self.mutations = mutations
     }
 
     public func add(component: LoggerComponent) {
@@ -30,9 +30,7 @@ public final actor LoggerBundler {
     }
 
     public func add(mutations: [Mutation]) {
-        transform = [
-            transform, mutations.composed()
-        ].composed()
+        self.mutations += mutations
     }
 
     /// Sends a Log to the retained LoggerComponents.
@@ -53,7 +51,7 @@ public final actor LoggerBundler {
             for logger in await loggers() {
                 let payload = await Payload(
                     destination: logger.id.value,
-                    event: transform(event, logger.id),
+                    event: mutations.transform(event, id: logger.id),
                     timestamp: .init()
                 )
 

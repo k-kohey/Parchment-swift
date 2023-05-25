@@ -31,27 +31,13 @@ public protocol Mutation: Sendable {
     func transform(_: any Loggable, id: LoggerComponentID) -> AnyLoggable
 }
 
-private extension Mutation {
-    var _transform: Transform {
-        {
-            self.transform($0, id: $1)
+extension Array: Mutation where Element == Mutation {
+    public func transform(_ base: Loggable, id: LoggerComponentID) -> AnyLoggable {
+        var result = AnyLoggable(base)
+        for mutation in self {
+            result = mutation.transform(result, id: id)
         }
+        return result
     }
 }
 
-extension Sequence where Element == Mutation {
-    func composed() -> Transform {
-        return map { $0._transform }.composed()
-    }
-}
-
-extension Sequence where Element == Transform {
-    func composed() -> Transform {
-        let base: Transform = { log, _ in AnyLoggable(log) }
-        return reduce(base) { partialResult, transform in
-            {
-                transform(partialResult($0, $1), $1)
-            }
-        }
-    }
-}
