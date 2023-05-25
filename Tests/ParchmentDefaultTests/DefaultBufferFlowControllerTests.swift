@@ -13,11 +13,11 @@ import XCTest
 final class EventQueueMock: LogBuffer, @unchecked Sendable {
     private var records: [Payload] = []
 
-    func save(_ e: [Payload]) {
+    func enqueue(_ e: [Payload]) {
         records += e
     }
 
-    func load(limit: Int?) async throws -> [Parchment.Payload] {
+    func dequeue(limit: Int?) async throws -> [Parchment.Payload] {
         let count: Int
         if let limit {
             count = limit
@@ -115,7 +115,7 @@ class RegularlyPollingSchedulerTests: XCTestCase {
                 return
             }
         }
-        buffer.save([.init(destination: "hoge", event: event, timestamp: Date())])
+        buffer.enqueue([.init(destination: "hoge", event: event, timestamp: Date())])
 
         while outputEvent == nil {
             await Task.yield()

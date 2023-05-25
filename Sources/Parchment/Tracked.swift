@@ -7,6 +7,12 @@
 
 import Foundation
 
+/// Logs changes to a value.
+///
+/// Mark the properties for which you wish to log changes as follows.
+///
+///     @Tracked(name: "age", with: logger) var age: Int
+///     @Tracked(name: "age", with: logger, scope: \.age) var state: State
 @propertyWrapper
 public struct Tracked<Value: Sendable, ScopeValue: Sendable> {
     private let logger: LoggerBundler

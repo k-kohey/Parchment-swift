@@ -19,8 +19,17 @@ public protocol LoggerSendable: Sendable {
     var timestamp: Date { get }
 }
 
+/// Sending logs to your server or SDK such as Firebase.
 public protocol LoggerComponent: Sendable {
+
+    /// A unique identifier.
+    /// This definition allows the user to specify an id when sending logs.
     static var id: LoggerComponentID { get }
+
+    /// Sends an array of `LoggerSendable` objects asynchronously.
+    ///
+    /// - Parameter _: The array of `LoggerSendable` objects to send.
+    /// - Returns: A boolean indicating whether the operation was successful.
     func send(_: [any LoggerSendable]) async -> Bool
 }
 

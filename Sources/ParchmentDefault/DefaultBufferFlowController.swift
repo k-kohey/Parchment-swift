@@ -34,7 +34,7 @@ public final class DefaultBufferFlowController: BufferFlowController, Sendable {
         _ events: [Payload], with buffer: T
     ) async throws {
         @Sendable @MainActor func save() async throws {
-            try await buffer.save(inputAccumulationPayloads)
+            try await buffer.enqueue(inputAccumulationPayloads)
             inputAccumulationPayloads = []
         }
 
