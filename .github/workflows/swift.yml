@@ -11,15 +11,17 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: macos-13
 
     steps:
       - uses: actions/checkout@v3
       - name: Build
         run: |
           swift build -v
-          swift build -v --package-path EventGen
+          # EventGen requires Xcode14.3
+          # swift build -v --package-path EventGen
       - name: Run tests
         run: |
           swift test -v
-          swift test -v --package-path EventGen
+          # EventGen requires Xcode14.3
+          # swift test -v --package-path EventGen
