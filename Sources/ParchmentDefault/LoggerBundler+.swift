@@ -24,6 +24,8 @@ public extension LoggerBundler {
         )
     }
 
+    /// This is a singleton instance.
+    /// Properties such as LoggerComponent and Mutation are empty, so set them as necessary.
     static var `standard`: LoggerBundler {
         standardInstance
     }
