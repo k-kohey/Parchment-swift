@@ -36,8 +36,8 @@ let package = Package(
         .executableTarget(
             name: "AppModule",
             dependencies: [
+                .product(name: "ParchmentCore", package: "Parchment"),
                 .product(name: "Parchment", package: "Parchment"),
-                .product(name: "ParchmentDefault", package: "Parchment"),
             ]
         )
     ]

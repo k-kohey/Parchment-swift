@@ -48,7 +48,7 @@ final class SwiftGeneratorTests: XCTestCase {
         let result = try generator.run(with: def)
 
         let expected = """
-        import Parchment
+        import ParchmentCore
         struct GeneratedEvent: Loggable {
             let eventName: String
             let parameters: [String: Sendable]

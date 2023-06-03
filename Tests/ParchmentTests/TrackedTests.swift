@@ -6,8 +6,8 @@
 //
 
 import XCTest
+@testable import ParchmentCore
 @testable import Parchment
-@testable import ParchmentDefault
 @testable import TestSupport
 
 private let loggerA = LoggerA()

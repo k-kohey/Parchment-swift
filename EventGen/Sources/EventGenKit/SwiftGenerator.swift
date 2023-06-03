@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Parchment
+import ParchmentCore
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
@@ -55,7 +55,7 @@ public struct SwiftGenerator {
 
     private func generate(with definisions: [EventDefinision]) -> String {
         SourceFileSyntax {
-            ImportDeclSyntax(path: [.init(name: "Parchment")])
+            ImportDeclSyntax(path: [.init(name: "ParchmentCore")])
             generatedEventStructDecl
             extensionDecl(with: definisions)
         }.formatted().description

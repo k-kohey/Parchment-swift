@@ -5,8 +5,8 @@
 //  Created by k-kohey on 2021/12/06.
 //
 
+@testable import ParchmentCore
 @testable import Parchment
-@testable import ParchmentDefault
 import XCTest
 
 private enum Event: Loggable {

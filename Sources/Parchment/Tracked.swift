@@ -5,7 +5,7 @@
 //  Created by Kohei Kawaguchi on 2023/05/17.
 //
 
-import Parchment
+import ParchmentCore
 
 /// Logs changes to a value.
 ///

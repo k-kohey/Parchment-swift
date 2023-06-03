@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Parchment
+import ParchmentCore
 
 public final class DefaultBufferFlowController: BufferFlowController, Sendable {
     let pollingInterval: UInt

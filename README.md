@@ -17,21 +17,21 @@ If you are using the Swift Package Project, you can add a dependency for this Pa
 
 ```swift
 dependencies: [
-    .product(name: "Parchment", package: "Parchment"),
+    .product(name: "ParchmentCore", package: "Parchment"),
     // The following statements are optional
-    .product(name: "ParchmentDefault", package: "Parchment"),
+    .product(name: "Parchment", package: "Parchment"),
 ]
 ```
 
 ## Project Overview
 
-### Parchment
+### ParchmentCore
 
 It contains the main logic and definitions for logging processing and event logging definitions.
 
-### ParchmentDefault
+### Parchment
 
-Provides a stander implementation compliant with the Protocol provided by Parchment. If you implement your own buffer and scheduler, you do not need to add any dependencies.
+Provides a stander implementation compliant with the Protocol provided by ParchmentCore. If you implement your own buffer and scheduler, you do not need to add any dependencies.
 
 See the [Customization](#customization) section for more details.
 
@@ -142,8 +142,8 @@ await logger.send([\.eventName: "tapButton", \.parameters: ["ButtonID": 1]])
 
 Please see the API documentation below（WIP）.
 
-- https://k-kohey.github.io/Parchment-swift/Parchment/documentation/parchment/
-- https://k-kohey.github.io/Parchment-swift/ParchmentDefault/documentation/parchmentdefault/
+- https://k-kohey.github.io/Parchment-swift/ParchmentCore/documentation/parchmentcore/
+- https://k-kohey.github.io/Parchment-swift/Parchment/documentation/Parchment/
 
 ## Customization
 
@@ -159,7 +159,7 @@ To create the type and set it to logger, write as follows.
 
 ```swift
 
-// An implementation similar to this can be found in ParchmentDefault
+// An implementation similar to this can be found in Parchment
 
 struct DeviceDataMutation: Mutation {
     private let deviceParams = [
@@ -207,7 +207,7 @@ To create the type and set it to logger, write as follows.
 
 ```swift
 
-// An implementation similar to this can be found in ParchmentDefault
+// An implementation similar to this can be found in Parchment
 final class RegularlyPollingScheduler: BufferedEventFlushScheduler {
     public static let `default` = RegularlyPollingScheduler(timeInterval: 60)
 
@@ -270,6 +270,6 @@ let logger = LoggerBundler(
 
 TrackingEventBuffer is a buffer that saves the log.
 
-ParchmentDefault defines a class SQLiteBuffer that uses SQLite to store logs.
+Parchment defines a class SQLiteBuffer that uses SQLite to store logs.
 
 This implementation can be replaced by a class that is compatible with TrackingEventBuffer.

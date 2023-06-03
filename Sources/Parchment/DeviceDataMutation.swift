@@ -7,7 +7,7 @@
 
 #if canImport(UIKit)
 
-    import Parchment
+    import ParchmentCore
     import UIKit
 
     public struct DeviceDataMutation: Mutation {

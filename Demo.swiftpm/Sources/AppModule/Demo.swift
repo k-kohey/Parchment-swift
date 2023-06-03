@@ -1,6 +1,6 @@
 import SwiftUI
+import ParchmentCore
 import Parchment
-import ParchmentDefault
 
 extension LoggerComponentID {
     static let my: Self = .init("My")
