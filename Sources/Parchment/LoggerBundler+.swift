@@ -5,8 +5,6 @@
 //  Created by k-kohey on 2021/12/29.
 //
 
-import ParchmentCore
-
 private let standardInstance = LoggerBundler.make(components: [])
 
 public extension LoggerBundler {

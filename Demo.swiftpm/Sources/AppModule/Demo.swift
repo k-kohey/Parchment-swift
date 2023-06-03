@@ -1,5 +1,4 @@
 import SwiftUI
-import ParchmentCore
 import Parchment
 
 extension LoggerComponentID {

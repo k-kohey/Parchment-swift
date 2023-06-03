@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ParchmentCore
 
 public struct ImpletionEvent: Loggable {
     public var eventName = "ImpletionEvent"

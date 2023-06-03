@@ -5,7 +5,6 @@
 //  Created by k-kohey on 2021/12/06.
 //
 
-@testable import ParchmentCore
 @testable import Parchment
 import XCTest
 

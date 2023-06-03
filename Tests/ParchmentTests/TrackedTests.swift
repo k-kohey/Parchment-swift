@@ -6,7 +6,6 @@
 //
 
 import XCTest
-@testable import ParchmentCore
 @testable import Parchment
 @testable import TestSupport
 

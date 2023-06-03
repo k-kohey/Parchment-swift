@@ -6,7 +6,6 @@
 //
 
 import Foundation
-@testable import ParchmentCore
 @testable import Parchment
 import XCTest
 
