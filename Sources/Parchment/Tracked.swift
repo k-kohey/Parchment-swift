@@ -5,8 +5,6 @@
 //  Created by Kohei Kawaguchi on 2023/05/17.
 //
 
-import Parchment
-
 /// Logs changes to a value.
 ///
 /// Mark the properties for which you wish to log changes as follows.

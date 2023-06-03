@@ -7,7 +7,6 @@
 
 import Foundation
 @testable import Parchment
-@testable import ParchmentDefault
 import XCTest
 
 final class EventQueueMock: LogBuffer, @unchecked Sendable {
@@ -17,7 +16,7 @@ final class EventQueueMock: LogBuffer, @unchecked Sendable {
         records += e
     }
 
-    func dequeue(limit: Int?) async throws -> [Parchment.Payload] {
+    func dequeue(limit: Int?) async throws -> [Payload] {
         let count: Int
         if let limit {
             count = limit

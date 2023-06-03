@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Parchment
+@testable import ParchmentCore
 
 class BufferRecordTests: XCTestCase {
     func testEcode() throws {

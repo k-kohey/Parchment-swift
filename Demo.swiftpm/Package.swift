@@ -37,7 +37,6 @@ let package = Package(
             name: "AppModule",
             dependencies: [
                 .product(name: "Parchment", package: "Parchment"),
-                .product(name: "ParchmentDefault", package: "Parchment"),
             ]
         )
     ]

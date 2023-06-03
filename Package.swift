@@ -8,12 +8,12 @@ let package = Package(
     platforms: [.iOS(.v14), .macOS(.v11)],
     products: [
         .library(
-            name: "Parchment",
-            targets: ["Parchment"]
+            name: "ParchmentCore",
+            targets: ["ParchmentCore"]
         ),
         .library(
-            name: "ParchmentDefault",
-            targets: ["ParchmentDefault"]
+            name: "Parchment",
+            targets: ["Parchment"]
         ),
     ],
     dependencies: [
@@ -22,7 +22,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "Parchment",
+            name: "ParchmentCore",
             swiftSettings: [
                 .unsafeFlags([
                     "-strict-concurrency=complete"
@@ -30,9 +30,9 @@ let package = Package(
             ]
         ),
         .target(
-            name: "ParchmentDefault",
+            name: "Parchment",
             dependencies: [
-                .target(name: "Parchment"),
+                .target(name: "ParchmentCore"),
                 .product(name: "SQLite", package: "SQLite.swift")
             ],
             swiftSettings: [
@@ -42,16 +42,16 @@ let package = Package(
             ]
         ),
         .testTarget(
+            name: "ParchmentCoreTests",
+            dependencies: ["ParchmentCore", "TestSupport"]
+        ),
+        .testTarget(
             name: "ParchmentTests",
             dependencies: ["Parchment", "TestSupport"]
         ),
-        .testTarget(
-            name: "ParchmentDefaultTests",
-            dependencies: ["ParchmentDefault", "TestSupport"]
-        ),
         .target(
             name: "TestSupport",
-            dependencies: ["Parchment"]
+            dependencies: ["ParchmentCore"]
         ),
     ]
 )

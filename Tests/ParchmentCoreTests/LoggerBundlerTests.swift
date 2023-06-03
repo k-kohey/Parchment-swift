@@ -5,7 +5,7 @@
 //  Created by k-kohey on 2021/11/22.
 //
 
-@testable import Parchment
+@testable import ParchmentCore
 @testable import TestSupport
 import XCTest
 

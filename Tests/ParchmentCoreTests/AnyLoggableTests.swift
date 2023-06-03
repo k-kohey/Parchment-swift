@@ -5,7 +5,7 @@
 //  Created by Kohei Kawaguchi on 2023/05/23.
 //
 
-@testable import Parchment
+@testable import ParchmentCore
 import XCTest
 
 private struct HogeEvent: Loggable {

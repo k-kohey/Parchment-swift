@@ -27,7 +27,7 @@ let package = Package(
             name: "EventGenKit",
             dependencies: [
                 .product(name: "Markdown", package: "swift-markdown"),
-                .product(name: "Parchment", package: "Parchment"),
+                .product(name: "ParchmentCore", package: "Parchment"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax")
             ]
         ),

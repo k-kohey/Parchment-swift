@@ -5,7 +5,7 @@
 //  Created by Kohei Kawaguchi on 2023/05/17.
 //
 
-import Parchment
+import ParchmentCore
 
 private extension LoggerComponentID {
     static let a = LoggerComponentID("A")
@@ -39,7 +39,7 @@ public final class EventQueueMock: LogBuffer, @unchecked Sendable {
         records += e
     }
 
-    public func dequeue(limit: Int?) async throws -> [Parchment.Payload] {
+    public func dequeue(limit: Int?) async throws -> [ParchmentCore.Payload] {
         let count: Int
         if let limit {
             count = limit

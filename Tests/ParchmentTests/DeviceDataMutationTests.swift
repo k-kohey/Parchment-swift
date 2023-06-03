@@ -6,7 +6,6 @@
 //
 
 @testable import Parchment
-@testable import ParchmentDefault
 import XCTest
 
 private enum Event: Loggable {

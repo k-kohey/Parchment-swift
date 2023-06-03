@@ -8,7 +8,7 @@
 import os
 import Foundation
 
-@_spi(Parchment) public let osLogger = Logger(subsystem: "com.k-kohey.parchment", category: "parchment")
+@_spi(ParchmentCore) public let osLogger = Logger(subsystem: "com.k-kohey.parchment", category: "parchment")
 
 public extension LoggerComponentID {
     static var debug: LoggerComponentID {

@@ -5,7 +5,7 @@
 //  Created by k-kohey on 2021/10/27.
 //
 
-@_spi(Parchment) import Parchment
+@_spi(ParchmentCore) import ParchmentCore
 import SQLite
 import Foundation
 
