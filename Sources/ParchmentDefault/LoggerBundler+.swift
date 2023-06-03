@@ -7,6 +7,8 @@
 
 import Parchment
 
+private let standardInstance = LoggerBundler.make(components: [])
+
 public extension LoggerBundler {
     static func make(
         components: [any LoggerComponent],
@@ -20,5 +22,11 @@ public extension LoggerBundler {
             bufferFlowController: bufferFlowController,
             mutations: mutations
         )
+    }
+
+    /// This is a singleton instance.
+    /// Properties such as LoggerComponent and Mutation are empty, so set them as necessary.
+    static var `standard`: LoggerBundler {
+        standardInstance
     }
 }

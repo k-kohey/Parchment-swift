@@ -7,6 +7,8 @@
 
 import XCTest
 @testable import Parchment
+@testable import ParchmentDefault
+@testable import TestSupport
 
 private let loggerA = LoggerA()
 private var bundler = LoggerBundler(

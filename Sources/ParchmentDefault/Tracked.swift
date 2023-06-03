@@ -5,7 +5,7 @@
 //  Created by Kohei Kawaguchi on 2023/05/17.
 //
 
-import Foundation
+import Parchment
 
 /// Logs changes to a value.
 ///
@@ -55,7 +55,7 @@ public struct Tracked<Value: Sendable, ScopeValue: Sendable> {
     public init(
         wrappedValue: Value,
         name: String,
-        with logger: LoggerBundler,
+        with logger: LoggerBundler = .standard,
         option: LoggerBundler.LoggingOption = .init()
     )  where ScopeValue == Never {
         self.init(
@@ -66,7 +66,7 @@ public struct Tracked<Value: Sendable, ScopeValue: Sendable> {
     public init(
         wrappedValue: Value,
         name: String,
-        with logger: LoggerBundler,
+        with logger: LoggerBundler = .standard,
         scope: KeyPath<Value, ScopeValue>? = nil,
         option: LoggerBundler.LoggingOption = .init()
     ) {
