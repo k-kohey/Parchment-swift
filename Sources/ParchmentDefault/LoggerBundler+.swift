@@ -7,6 +7,8 @@
 
 import Parchment
 
+private let standardInstance = LoggerBundler.make(components: [])
+
 public extension LoggerBundler {
     static func make(
         components: [any LoggerComponent],
@@ -20,5 +22,9 @@ public extension LoggerBundler {
             bufferFlowController: bufferFlowController,
             mutations: mutations
         )
+    }
+
+    static var `standard`: LoggerBundler {
+        standardInstance
     }
 }
