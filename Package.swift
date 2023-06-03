@@ -43,11 +43,15 @@ let package = Package(
         ),
         .testTarget(
             name: "ParchmentTests",
-            dependencies: ["Parchment"]
+            dependencies: ["Parchment", "TestSupport"]
         ),
         .testTarget(
             name: "ParchmentDefaultTests",
-            dependencies: ["ParchmentDefault"]
+            dependencies: ["ParchmentDefault", "TestSupport"]
+        ),
+        .target(
+            name: "TestSupport",
+            dependencies: ["Parchment"]
         ),
     ]
 )

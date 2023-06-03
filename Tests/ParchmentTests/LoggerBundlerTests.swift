@@ -6,6 +6,7 @@
 //
 
 @testable import Parchment
+@testable import TestSupport
 import XCTest
 
 @MainActor

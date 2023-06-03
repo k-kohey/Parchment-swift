@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Parchment
 
 public struct ImpletionEvent: Loggable {
     public var eventName = "ImpletionEvent"
@@ -39,7 +40,7 @@ public extension View {
     /// Hook onAppear to send ImpletionEvent
     func track(
         screen name: String,
-        with logger: LoggerBundler,
+        with logger: LoggerBundler = .standard,
         option: LoggerBundler.LoggingOption? = nil
     ) -> some View {
         modifier(
